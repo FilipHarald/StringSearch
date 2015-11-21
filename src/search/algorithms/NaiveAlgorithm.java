@@ -18,7 +18,7 @@ public class NaiveAlgorithm implements Algorithm {
 			boolean found = true;
 			for(int j = 0; j < p.length; j++){
 				operations++;
-				if(!(t[i+j] == p[j])){
+				if(t[i+j] != p[j]){
 					found = false;
 					break;
 				}
