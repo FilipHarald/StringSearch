@@ -4,22 +4,26 @@ import java.util.LinkedList;
 import java.util.List;
 
 import search.AlgorithmTester;
-import search.algorithms.Algorithm;
-import search.algorithms.NaiveAlgorithm;
+import search.algorithms.*;
 import search.entities.TestData;
 
 public class Main {
 
 	public static void main(String[] args) {
 		 
-		String t = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-		String p = "aaaaaaaaaaaaaaaaa";
-		
-		TestData data = new TestData(t.toCharArray(), p.toCharArray());
+		TestData data = TestData.loadFiles("alphabet");
 		
 		List<Algorithm> algorithms = new LinkedList<>();
 		
-		algorithms.add(new NaiveAlgorithm());
+		
+		//algorithms.add(new NaiveAlgorithm());
+		//algorithms.add(new NaiveAlgorithm());
+		//algorithms.add(new NaiveAlgorithm());
+		//algorithms.add(new NaiveAlgorithm());
+		algorithms.add(new ZBoxAlgorithm());
+		algorithms.add(new ZBoxAlgorithm());
+		//algorithms.add(new NaiveAlgorithm());
+		
 		
 		AlgorithmTester.run(algorithms, data, 10);
 		

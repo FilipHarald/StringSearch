@@ -1,5 +1,7 @@
 package search;
 
+import java.util.concurrent.TimeUnit;
+
 import search.algorithms.Algorithm;
 import search.entities.AlgorithmResult;
 import search.entities.SearchResult;
@@ -14,7 +16,8 @@ public class Search {
 		for (int i = 0; i < times; i++) {
 			long start = System.nanoTime();
 			result = algorithm.run(data.getT(), data.getP());
-			duration += System.nanoTime() - start;
+			//duration += System.nanoTime() - start;
+			System.out.println(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - start));
 		}
 		
 		return new SearchResult(algorithm, result.getMatches(), result.getOperations(), duration/times, times);

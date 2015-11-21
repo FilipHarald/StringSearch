@@ -21,7 +21,7 @@ public class AlgorithmTester {
 		
 		for (Algorithm algorithm : algorithms) {
 			System.out.println("Running algorithm " + algorithm.getClass().getSimpleName() + " over data " + times + " times");
-			results.add(Search.run(algorithm, data, times));
+			results.add(Search.run(algorithm, data.copy(), times));
 		}
 		
 		for (SearchResult result : results) {

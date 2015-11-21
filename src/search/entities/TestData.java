@@ -3,7 +3,6 @@ package search.entities;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.function.Consumer;
 
 public class TestData {
 	private final char[] p;
@@ -25,6 +24,10 @@ public class TestData {
 		return t;
 	}
 	
+	public TestData copy() {
+		return new TestData(t.clone(), p.clone());
+	}
+	
 	public static TestData loadFiles(String filename){
 		return new TestData(load(filename + ".t"), load(filename + ".p"));
 	}
@@ -41,6 +44,6 @@ public class TestData {
 			e.printStackTrace();
 		}
 		return sb.toString().toCharArray();
-		}
+	}
 	
 }
