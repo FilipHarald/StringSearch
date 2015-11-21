@@ -11,9 +11,9 @@ public class ZBoxAlgorithm implements Algorithm {
 	public AlgorithmResult run(char[] t, char[] p) {
 		List<Integer> matches = new LinkedList<>();
 		long operations = 0;
-		
-		char[] s = concat(p, concat(new char[] {'\0'}, t));
-		
+	
+		char[] s = concat(p, concat(new char[] {'\0'}, t));	
+	
 		int[] z = new int[s.length];
 		int k, r = 0, l = 0;
 		int m;
@@ -37,9 +37,9 @@ public class ZBoxAlgorithm implements Algorithm {
 				}
 			}
 		}
-		
+				
 		for (int i = p.length + 1; i < z.length; i++)
-			if (z[i] == p.length) matches.add(i - (p.length+1));
+			if (z[i] == p.length) { operations++; matches.add(i - (p.length+1)); }
 		
 		return new AlgorithmResult(matches, operations);
 	}

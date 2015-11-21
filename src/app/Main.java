@@ -19,16 +19,16 @@ public class Main {
 		//System.out.println(TimeUnit.NANOSECONDS.toMicros(System.nanoTime()));
 		//algorithms.add(new NaiveAlgorithm());
 		//algorithms.add(new NaiveAlgorithm());
-		algorithms.add(new ZBoxAlgorithm());
-		algorithms.add(new NaiveAlgorithm());
 		
+		algorithms.add(new NaiveAlgorithm());
+		algorithms.add(new ZBoxAlgorithm());
 		algorithms.add(new NaiveAlgorithm());
 		
 		//algorithms.add(new ZBoxAlgorithm());
 		//algorithms.add(new NaiveAlgorithm());
 		
 		
-		AlgorithmTester.run(algorithms, data, 20);
+		AlgorithmTester.run(algorithms, data, 1);
 		
 	}
 }
