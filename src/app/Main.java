@@ -2,6 +2,7 @@ package app;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import search.AlgorithmTester;
 import search.algorithms.*;
@@ -15,17 +16,19 @@ public class Main {
 		
 		List<Algorithm> algorithms = new LinkedList<>();
 		
-		
-		//algorithms.add(new NaiveAlgorithm());
-		//algorithms.add(new NaiveAlgorithm());
+		//System.out.println(TimeUnit.NANOSECONDS.toMicros(System.nanoTime()));
 		//algorithms.add(new NaiveAlgorithm());
 		//algorithms.add(new NaiveAlgorithm());
 		algorithms.add(new ZBoxAlgorithm());
-		algorithms.add(new ZBoxAlgorithm());
+		algorithms.add(new NaiveAlgorithm());
+		
+		algorithms.add(new NaiveAlgorithm());
+		
+		//algorithms.add(new ZBoxAlgorithm());
 		//algorithms.add(new NaiveAlgorithm());
 		
 		
-		AlgorithmTester.run(algorithms, data, 10);
+		AlgorithmTester.run(algorithms, data, 20);
 		
 	}
 }
