@@ -26,5 +26,13 @@ public class SearchResult extends AlgorithmResult {
 	public String getAlgorithm() {
 		return algorithm;
 	}
+
+	@Override
+	public String toString() {
+		return "SearchResult [algorithm=" + algorithm + ", times=" + times + ", duration=" + duration
+				+ ", matches=" + getMatches() + ", operations=" + getOperations() + "]";
+	}
+	
+	
 			
 }
