@@ -29,11 +29,11 @@ public class TestData {
 	}
 	
 	public static TestData loadFiles(String filename){
-		return new TestData(load(filename + ".t"), load(filename + ".p"));
+		return new TestData(load(filename + ".text"), load(filename + ".pattern"));
 	}
 	
 	public static TestData loadFiles(String tFilename, String pFilename){
-		return new TestData(load(tFilename + ".t"), load(pFilename + ".p"));
+		return new TestData(load(tFilename + ".text"), load(pFilename + ".pattern"));
 	}
 	
 	public static char[] load(String filename){
