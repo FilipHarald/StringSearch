@@ -15,8 +15,8 @@ public class AlgorithmTester {
 		List<SearchResult> results = new LinkedList<>();
 		
 		System.out.println("AlgorithmTester");
-		System.out.println("T = " + Arrays.toString(data.getT()));
-		System.out.println("P = " + Arrays.toString(data.getP()));
+		//System.out.println("T = " + Arrays.toString(data.getT()));
+		//System.out.println("P = " + Arrays.toString(data.getP()));
 		System.out.println();
 		
 		for (Algorithm algorithm : algorithms) {
