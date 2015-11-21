@@ -8,9 +8,9 @@ import search.entities.AlgorithmResult;
  */
 public interface Algorithm {
 	/**
-	 * Runs the algorithm for the search phrase, p, in the text, t.
+	 * Runs the algorithm for the search pattern, p, in the text, t.
 	 * @param t The text to  search in.
-	 * @param p The phrase to search for.
+	 * @param p The pattern to search for.
 	 * @return 
 	 */
 	AlgorithmResult run(char[] t, char[] p);
