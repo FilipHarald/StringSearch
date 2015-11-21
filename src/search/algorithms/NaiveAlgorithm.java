@@ -1,6 +1,8 @@
-package search;
+package search.algorithms;
 
 import java.util.LinkedList;
+
+import search.entities.AlgorithmResult;
 
 /**
  * @author Filip Harald

@@ -4,6 +4,10 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import search.algorithms.Algorithm;
+import search.entities.SearchResult;
+import search.entities.TestData;
+
 public class AlgorithmTester {
 
 	public static void run(List<Algorithm> algorithms, TestData data, int times) {

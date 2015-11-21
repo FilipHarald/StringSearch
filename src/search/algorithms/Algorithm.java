@@ -1,4 +1,6 @@
-package search;
+package search.algorithms;
+
+import search.entities.AlgorithmResult;
 
 /**
  * @author Albert Kaaman

@@ -1,10 +1,10 @@
-package search;
+package search.entities;
 
 public class TestData {
 	private final char[] p;
 	private final char[] t;
 	
-	public TestData(char[] p, char[] t) {
+	public TestData(char[] t, char[] p) {
 		this.p = p;
 		this.t = t;
 	}
