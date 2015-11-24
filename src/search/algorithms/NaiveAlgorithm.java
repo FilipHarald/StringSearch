@@ -23,7 +23,7 @@ public class NaiveAlgorithm implements Algorithm {
 					break;
 				}
 			}
-			if(found) matches.add(i);
+			if (found) matches.add(i);
 		}
 		return new AlgorithmResult(matches, operations);
 	}

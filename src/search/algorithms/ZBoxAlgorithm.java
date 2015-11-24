@@ -12,6 +12,7 @@ public class ZBoxAlgorithm implements Algorithm {
 		List<Integer> matches = new LinkedList<>();
 		long operations = 0;
 	
+		// S = P$T
 		char[] s = concat(p, concat(new char[] {'\0'}, t));	
 	
 		int[] z = new int[s.length];
@@ -20,15 +21,24 @@ public class ZBoxAlgorithm implements Algorithm {
 		int kp;
 				
 		for (k = 1; k < s.length; k++) {
+			/* If we're outside a z box, count as usual until we fall off.
+			 * When we fall off, create a z box.
+			 */
 			if (k > r) {
 				m = 0;
+				
 				while (k+m < s.length && s[k+m] == s[m]) { m++; operations++; }
 				z[k] = m;
 				if (m > 0) { r = k+m-1; l = k; }
+			/* If we're inside a z box, ???
+			 * 
+			 */
 			} else {
 				kp = k-l;
-				if (z[kp] < r-k+1) z[k] = z[kp];
-				else {
+				operations++;
+				if (z[kp] < r-k+1) {
+					z[k] = z[kp];
+				} else {
 					m = 1;
 					while (r+m < s.length && s[r+m] == s[r-k+m]) { m++; operations++; }
 					z[k] = r+m-k;
@@ -36,10 +46,17 @@ public class ZBoxAlgorithm implements Algorithm {
 					l = k;
 				}
 			}
+			
+			operations++;
+			if (z[k] == p.length) { matches.add(k); }
 		}
-				
-		for (int i = p.length + 1; i < z.length; i++)
-			if (z[i] == p.length) { operations++; matches.add(i - (p.length+1)); }
+		
+		/*
+		for (int i = p.length + 1; i < z.length; i++) {
+			operations++;
+			if (z[i] == p.length) { matches.add(i - (p.length+1)); }
+		}
+		*/
 		
 		return new AlgorithmResult(matches, operations);
 	}

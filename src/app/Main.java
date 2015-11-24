@@ -28,7 +28,7 @@ public class Main {
 		//algorithms.add(new NaiveAlgorithm());
 		
 		
-		AlgorithmTester.run(algorithms, data, 1);
+		AlgorithmTester.run(algorithms, data, 20);
 		
 	}
 }
