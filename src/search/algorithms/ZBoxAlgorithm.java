@@ -48,7 +48,7 @@ public class ZBoxAlgorithm implements Algorithm {
 			}
 			
 			operations++;
-			if (z[k] == p.length) { matches.add(k); }
+			if (z[k] == p.length) { matches.add(k - p.length - 1); }
 		}
 		
 		/*
