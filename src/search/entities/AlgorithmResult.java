@@ -22,7 +22,7 @@ public class AlgorithmResult {
 	}
 
 	/**
-	 * @return Matches found in run
+	 * @return Matches found in runs
 	 */
 	public List<Integer> getMatches() {
 		return matches;

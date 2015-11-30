@@ -13,14 +13,10 @@ public class Search {
 		AlgorithmResult result = null;
 		long duration = 0;
 				
-		for (int i = 0; i < 5 + times; i++) {
+		for (int i = 0; i < times; i++) {
 			long start = System.nanoTime();
 			result = algorithm.run(data.getT(), data.getP());
-			// Do 5 silent runs to get rid of JVM caching/profiling optimizations
-			if (i < 5)
-				continue;
 			duration += System.nanoTime() - start;
-			//System.out.println(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - start));
 		}
 		
 		return new SearchResult(algorithm, result.getMatches(), result.getOperations(), duration/times, times);

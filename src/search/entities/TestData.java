@@ -45,7 +45,7 @@ public class TestData {
 	}
 	
 	/**
-	 * Loads text and pattern from files filename.t and filename.p. Assumes both files reside in /resources.
+	 * Loads text and pattern from files filename.text and filename.pattern. Assumes both files reside in /resources.
 	 * @param filename Filename without any extension
 	 * @return New TestData instance
 	 */
