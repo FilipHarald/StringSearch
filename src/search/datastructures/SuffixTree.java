@@ -1,11 +1,13 @@
 package search.datastructures;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.List;
 
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.layout.mxIGraphLayout;
@@ -34,7 +36,9 @@ public class SuffixTree {
 			System.out.println("/////////////////////////////////////////////////////////////////////////////////////////////////////////");
 			this.add(c, remainder, activePoint, null);
 			length++;
+			System.out.println("Length = " + length);
 			System.out.println(toString());
+			this.saveAsImage(length);
 		}
 		
 	}
@@ -58,6 +62,8 @@ public class SuffixTree {
 		if (edge != null) {
 			
 			if (text[edge.textIndex + activePoint.length] == c) {
+				System.out.println("Found c on current edge");
+				
 				if (temp == c) {					
 					activePoint.edgeFirstChar = c;
 				}
@@ -65,14 +71,14 @@ public class SuffixTree {
 				System.out.println("length++");
 				remainder++;
 				
-				if (activePoint.length == edge.length) {
+				if (activePoint.length == edge.length + 1) {
 					activePoint.node = edge.endNode;
 					activePoint.edgeFirstChar = '\0';
 					activePoint.length = 0;
 				}
 				
 			} else {
-				
+				System.out.println("Splitting edge");
 				edge.length = edge.textIndex + activePoint.length - 1;
 				
 				SuffixEdge newEdge = new SuffixEdge(new SuffixNode(), edge.textIndex + activePoint.length, -1);
@@ -111,8 +117,30 @@ public class SuffixTree {
 		}
 		
 	}
+	
+	public List<Integer> find(String pattern) {
+		List<Integer> matches = new LinkedList<>();
+		
+		SuffixNode node = root;
+		int currentIndex = 0;
+		int currentLength = 0;
+		
+		while (node != null) {
+			
+			SuffixEdge edge = hashMap.get(new SuffixKey(node, pattern.charAt(currentIndex)));
+			
+			if (edge != null) {
+				SuffixNode nextNode = edge.endNode;
+				for (int i = currentIndex + 1; i < edge.length; i++)
+					if (text[edge.textIndex + i] != pattern.charAt(i))
+						nextNode = null;
+				node = nextNode;
+				currentIndex = currentIndex + edge.length;
+			}
+		}
+	}
 
-	public void saveAsImage() {
+	public void saveAsImage(int length) {
 		DefaultDirectedGraph<SuffixNode, SuffixEdge> g = new DefaultDirectedGraph<SuffixNode, SuffixEdge>(SuffixEdge.class);
 
 		for (Map.Entry<SuffixKey, SuffixEdge> entry : hashMap.entrySet()) {
@@ -133,7 +161,7 @@ public class SuffixTree {
 		BufferedImage bi = mxCellRenderer.createBufferedImage(jgxa, null, 1, Color.WHITE, true, null);
 
 		try {
-			ImageIO.write(bi, "PNG", new File("graph.png"));
+			ImageIO.write(bi, "PNG", new File("graph" + length + ".png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -173,8 +201,8 @@ public class SuffixTree {
 			for (int i = textIndex; i < end ; i++)
 				sb.append(text[i]);
 
-			return "SuffixEdge [endNode=" + endNode + ", textIndex=" + textIndex + ", length=" + length + ", text=" + sb.toString() + "]";
-			//return sb.toString();
+			//return "SuffixEdge [endNode=" + endNode + ", textIndex=" + textIndex + ", length=" + length + ", text=" + sb.toString() + "]";
+			return sb.toString();
 		}
 				
 	}

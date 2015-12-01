@@ -14,6 +14,6 @@ public class TestSuffixTree {
 
 		// Är något problem som får nod 1414644648 att hoppa av trädet i steg 7-9 nånstans
 
-		st.saveAsImage();
+		//st.saveAsImage();
 	}
 }
