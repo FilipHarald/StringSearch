@@ -6,9 +6,10 @@ import java.util.List;
 import search.entities.AlgorithmResult;
 
 public class ZBoxAlgorithm implements Algorithm {
-
+	private char[] t;
+	
 	@Override
-	public AlgorithmResult run(char[] t, char[] p) {
+	public AlgorithmResult run(char[] p) {
 		List<Integer> matches = new LinkedList<>();
 		long operations = 0;
 	
@@ -68,6 +69,11 @@ public class ZBoxAlgorithm implements Algorithm {
 	   System.arraycopy(a, 0, c, 0, aLen);
 	   System.arraycopy(b, 0, c, aLen, bLen);
 	   return c;
+	}
+
+	@Override
+	public void preProcess(char[] t) {
+		this.t = t;
 	}
 
 }

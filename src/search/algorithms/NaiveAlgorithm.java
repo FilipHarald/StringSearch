@@ -9,9 +9,10 @@ import search.entities.AlgorithmResult;
  *
  */
 public class NaiveAlgorithm implements Algorithm {
+	private char[] t;
 	
 	@Override
-	public AlgorithmResult run(char[] t, char[] p) {
+	public AlgorithmResult run(char[] p) {
 		LinkedList<Integer> matches = new LinkedList<Integer>();
 		long operations = 0;
 		for(int i = 0; i <= t.length-p.length; i++){
@@ -26,6 +27,11 @@ public class NaiveAlgorithm implements Algorithm {
 			if (found) matches.add(i);
 		}
 		return new AlgorithmResult(matches, operations);
+	}
+	
+	@Override
+	public void preProcess(char[] t) {
+		this.t = t;
 	}
 
 }

@@ -13,5 +13,7 @@ public interface Algorithm {
 	 * @param p The pattern to search for.
 	 * @return 
 	 */
-	AlgorithmResult run(char[] t, char[] p);
+	AlgorithmResult run(char[] p);
+	
+	void preProcess(char[] t);
 }

@@ -9,13 +9,14 @@ import search.entities.TestData;
 
 public class Search {
 	public static SearchResult run(Algorithm algorithm, TestData data, int times){
+		algorithm.preProcess(data.getT());
 		
 		AlgorithmResult result = null;
 		long duration = 0;
 				
 		for (int i = 0; i < times; i++) {
 			long start = System.nanoTime();
-			result = algorithm.run(data.getT(), data.getP());
+			result = algorithm.run(data.getP());
 			duration += System.nanoTime() - start;
 		}
 		
