@@ -12,8 +12,16 @@ import java.util.List;
 
 import com.mxgraph.layout.hierarchical.*;
 import com.mxgraph.layout.orthogonal.mxOrthogonalLayout;
+import com.mxgraph.canvas.mxICanvas;
+import com.mxgraph.canvas.mxSvgCanvas;
 import com.mxgraph.layout.*;
 import com.mxgraph.util.mxCellRenderer;
+import com.mxgraph.util.mxCellRenderer.CanvasFactory;
+import com.mxgraph.util.mxDomUtils;
+import com.mxgraph.util.mxUtils;
+import com.mxgraph.util.mxXmlUtils;
+import com.mxgraph.view.mxGraph;
+
 import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -47,53 +55,55 @@ public class SuffixTree {
 			//System.out.println(toString());
 			
 		}*/
+		//if (text.length <= 50)
+			//this.saveAsImage(0);
+			this.saveAsSVG();
 		
 	}
 
 	private void build() {
 		ActivePoint activePoint = new ActivePoint(root, '\0', 0);
-
+		
 		int i = 0, j = 0;
 		while (i < text.length) {
 			SuffixNode previouslyInsertedNode = null;
 			int remainder = 1;
 			while (remainder >= 1) {
-				//length = j;
-				System.out.println("remainder = " + remainder);
-				System.out.println(activePoint);
-				System.out.println("i="+i+",j="+j);
-				StringBuilder sb = new StringBuilder();
-				for (int z = i; z < j + 1; z++)
-					sb.append(text[z]);
-				System.out.println("Adding suffix " + sb.toString());
+//				System.out.println(length);
+//				System.out.println("remainder = " + remainder);
+//				System.out.println(activePoint);
+//				System.out.println("i="+i+",j="+j);
+//				StringBuilder sb = new StringBuilder();
+//				for (int z = i; z < j + 1; z++)
+//					sb.append(text[z] == ' ' ? '_' : text[z]);
+//				System.out.println("Adding suffix " + sb.toString());
 
 				char temp = activePoint.edgeFirstChar != '\0' ? activePoint.edgeFirstChar : text[i + activePoint.length];
-				System.out.println("Getting edge with first char = " + temp);
+//				System.out.println("Getting edge with first char = " + temp);
 				SuffixEdge edge = activePoint.node.getEdge(temp);
 
-				System.out.println("Found edge = " + edge);
+//				System.out.println("Found edge = " + edge);
 
 				if (edge != null) {
-					System.out.println("text[" + (edge.textIndex + activePoint.length) + "] (" + text[edge.textIndex + activePoint.length] + ") == [" + (i + activePoint.length) + "] (" + text[i + activePoint.length] + ")?");
+//					System.out.println("text[" + (edge.textIndex + activePoint.length) + "] (" + text[edge.textIndex + activePoint.length] + ") == [" + (i + activePoint.length) + "] (" + text[i + activePoint.length] + ")?");
 					if (text[edge.textIndex + activePoint.length] == text[i + activePoint.length]) {
 						activePoint.edgeFirstChar = temp;
 						activePoint.length++;
 						remainder++;
 						j++;
-						length += 1;
-
-						System.out.println("length++ (" + activePoint.length + ")");
+//						length += 1;
+//						System.out.println("length++ (" + activePoint.length + ")");
 						if (activePoint.length == edge.length) { // + 1
-							System.out.println("activePoint length is equal to current edge length, moving activePoint node");
+//							System.out.println("activePoint length is equal to current edge length, moving activePoint node");
 							activePoint.node = edge.endNode;
 							activePoint.edgeFirstChar = '\0';
 							activePoint.length = 0;
 							i = j;
-							remainder--;
+							//remainder--;
 						}
 					} else {
-						System.out.println("Splitting!");
-						System.out.println("Remainder = " + remainder);
+//						System.out.println("Splitting!");
+//						System.out.println("Remainder = " + remainder);
 
 						SuffixNode insertedNode = new SuffixNode();
 						SuffixNode oldNode = edge.endNode;
@@ -102,14 +112,15 @@ public class SuffixTree {
 						edge.endNode = insertedNode;
 						edge.length = activePoint.length;
 
-						System.out.println("New (old) edge = " + edge);
+//						System.out.println("New (old) edge = " + edge);
+						
 
 						int l = oldNode.hashMap.size() > 0 ? Math.abs(oldLength - edge.length) : -1;
 						SuffixEdge newEdge = new SuffixEdge(oldNode, edge.textIndex + edge.length, l);
 						SuffixEdge newEdge2 = new SuffixEdge(new SuffixNode(), j, -1);
 
-						System.out.println("New edge 1 = " + newEdge);
-						System.out.println("New edge 2 = " + newEdge2);
+//						System.out.println("New edge 1 = " + newEdge);
+//						System.out.println("New edge 2 = " + newEdge2);
 
 						for (Map.Entry<Character, SuffixEdge> child : edge.endNode.hashMap.entrySet()) {
 							child.getValue().textIndex -= 1;
@@ -127,9 +138,9 @@ public class SuffixTree {
 								activePoint.edgeFirstChar = text[i];
 							} else
 								activePoint.edgeFirstChar = text[edge.textIndex + 1]; // + 1
-							System.out.println("length-- (" + activePoint.length + ")");
+//							System.out.println("length-- (" + activePoint.length + ")");
 						} else {
-							System.out.println("Following suffix link to node = " + activePoint.node.suffixLink);
+//							System.out.println("Following suffix link to node = " + activePoint.node.suffixLink);
 							activePoint.node = activePoint.node.suffixLink != null ? activePoint.node.suffixLink : root;
 							activePoint.edgeFirstChar = text[i];
 
@@ -140,26 +151,32 @@ public class SuffixTree {
 							previouslyInsertedNode.suffixLink = edge.endNode;
 						previouslyInsertedNode = edge.endNode;
 
-						this.saveAsImage(i);
+//						this.saveAsImage(i);
 					}
 
 				} else {
 					SuffixEdge newEdge = new SuffixEdge(new SuffixNode(), i, -1);
 					activePoint.node.addEdge(text[i], newEdge);
 					remainder--;
-					i++;
-					j=i;
-					if (i < text.length) {
-						activePoint.edgeFirstChar = text[i];
-						length += 1;
+					
+					if (!activePoint.node.equals(root))
+						activePoint.node = activePoint.node.suffixLink != null ? activePoint.node.suffixLink : root;
+					else {
+						i++;
+						j=i;
+						if (i < text.length) {
+							activePoint.edgeFirstChar = text[i];
+	//						length += 1;
+						}
 					}
-					this.saveAsImage(i);
+					
+//					this.saveAsImage(i);
 				}
 
 			}
 			length = i;
 
-			this.saveAsImage(i);
+//			this.saveAsImage(i);
 		}
 	}
 	
@@ -268,6 +285,10 @@ public class SuffixTree {
 	}
 	
 	public List<Integer> find(String pattern) {
+		return find(pattern.toCharArray());
+	}
+	
+	public List<Integer> find(char[] pattern) {
 		List<Integer> matches = new LinkedList<>();
 		
 		SuffixNode node = root;
@@ -275,9 +296,9 @@ public class SuffixTree {
 		int currentLength = 0;
 		
 		while (node != null) {
-			System.out.println(node);
-			if (currentLength == pattern.length()) {
-				System.out.println("here");
+//			System.out.println(node);
+			if (currentLength == pattern.length) {
+//				System.out.println("here");
 				// If we've gotten to a node and currentLength is equal to pattern length, then all leaf nodes starting from this node are matching suffixes to pattern
 				/*
 				int suffixLength = currentLength;
@@ -298,28 +319,28 @@ public class SuffixTree {
 				
 			} else {
 				//SuffixEdge edge = hashMap.get(new SuffixKey(node, pattern.charAt(currentIndex)));			
-				SuffixEdge edge = node.hashMap.get(pattern.charAt(currentIndex));
-				System.out.println(edge);
+				SuffixEdge edge = node.hashMap.get(pattern[currentIndex]);
+//				System.out.println(edge);
 				SuffixNode nextNode = null;
 				if (edge != null) {
 					nextNode = edge.endNode;
 					int end = edge.length < 0 ? text.length - edge.textIndex : edge.length;
 					for (int i = 0; i < end; i++) {
-						if (currentIndex + i >= pattern.length()) {
+						if (currentIndex + i >= pattern.length) {
 							matches.add(edge.textIndex - (i - currentIndex) - 1);
 							return matches;  // single match since we finished on an edge
-						} else if (text[edge.textIndex + i] != pattern.charAt(currentIndex + i)) {
+						} else if (text[edge.textIndex + i] != pattern[currentIndex + i]) {
 							return matches; // matches is empty at this point
 						}
 					}
 					currentLength += edge.length;
-					node = nextNode;
 					currentIndex = currentIndex + edge.length;
 				}
+				node = nextNode;
 			}
 			
 		}
-		return null;
+		return matches;
 	}
 	
 	private void addEdges(DefaultDirectedGraph<SuffixNode, SuffixEdge> g, SuffixNode n) {
@@ -330,6 +351,47 @@ public class SuffixTree {
 			g.addEdge(n, child.getValue().endNode, child.getValue());
 			addEdges(g, child.getValue().endNode);
 		}
+	}
+	
+	public void saveAsSVG() {
+	DefaultDirectedGraph<SuffixNode, SuffixEdge> g = new DefaultDirectedGraph<SuffixNode, SuffixEdge>(SuffixEdge.class);
+	
+	/*
+	for (Map.Entry<SuffixKey, SuffixEdge> entry : hashMap.entrySet()) {
+		SuffixNode start = entry.getKey().node;
+		SuffixNode end = entry.getValue().endNode;
+	
+		if (!g.containsVertex(start))
+			g.addVertex(start);
+		if (!g.containsVertex(end))
+			g.addVertex(end);
+		g.addEdge(start, end, entry.getValue());
+	}*/
+	
+	g.addVertex(root);
+	addEdges(g, root);
+	
+	JGraphXAdapter<SuffixNode, SuffixEdge> jgxa = new JGraphXAdapter<SuffixNode, SuffixEdge>(g);
+	
+	mxIGraphLayout asd = new mxHierarchicalLayout(jgxa);
+
+	asd.execute(jgxa.getDefaultParent());
+
+	String filename = "graph.svg";
+	mxSvgCanvas canvas = (mxSvgCanvas) mxCellRenderer.drawCells(
+	    jgxa, null, 1, null, new CanvasFactory() {
+	    public mxICanvas createCanvas(int width, int height) {
+	        mxSvgCanvas canvas = new mxSvgCanvas(mxDomUtils
+	            .createSvgDocument(width, height));
+	            canvas.setEmbedded(true);
+	            return canvas;
+	        } 
+	    });
+	  try {
+	    mxUtils.writeFile(mxXmlUtils.getXml(canvas.getDocument()), filename);
+	  } catch (IOException e) {
+	    e.printStackTrace();
+	  } 
 	}
 
 	public void saveAsImage(int length) {
@@ -398,7 +460,7 @@ public class SuffixTree {
 			
 			int end = length < 0 ? SuffixTree.this.length : textIndex + length;
 			for (int i = textIndex; i < end ; i++)
-				sb.append(text[i]);
+				sb.append(text[i] == ' ' ? '_' : text[i]);
 
 			sb.append("["+textIndex+","+length+"]");
 			//return "SuffixEdge [endNode=" + endNode + ", textIndex=" + textIndex + ", length=" + length + ", text=" + sb.toString() + "]";
