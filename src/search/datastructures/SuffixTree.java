@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -15,6 +16,7 @@ import com.mxgraph.layout.orthogonal.mxOrthogonalLayout;
 import com.mxgraph.canvas.mxICanvas;
 import com.mxgraph.canvas.mxSvgCanvas;
 import com.mxgraph.layout.*;
+import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxCellRenderer;
 import com.mxgraph.util.mxCellRenderer.CanvasFactory;
 import com.mxgraph.util.mxDomUtils;
@@ -27,8 +29,9 @@ import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.DefaultDirectedGraph;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 
-public class SuffixTree {
+public class SuffixTree implements Serializable {
 	private static int nodeId = 0;
 	private final char[] text;
 	private final SuffixNode root;
@@ -57,220 +60,145 @@ public class SuffixTree {
 		}*/
 		//if (text.length <= 50)
 			//this.saveAsImage(0);
-			this.saveAsSVG();
-		
+		//this.saveAsSVG();
+
 	}
 
 	private void build() {
-		ActivePoint activePoint = new ActivePoint(root, '\0', 0);
-		
-		int i = 0, j = 0;
-		while (i < text.length) {
+		SuffixNode activeNode = root;
+		char activeEdgeFirstChar = '\0';
+		int activeLength = 0;
+
+		int currentSuffixStart = 0;
+		int currentSuffixEnd = 0;
+
+		while (currentSuffixStart < text.length) {
+			length = currentSuffixEnd;
+			this.saveAsImage(currentSuffixEnd);
+			// at beginning of every suffix we reset remaining counter and previously inserted pointer
 			SuffixNode previouslyInsertedNode = null;
-			int remainder = 1;
-			while (remainder >= 1) {
-//				System.out.println(length);
-//				System.out.println("remainder = " + remainder);
-//				System.out.println(activePoint);
-//				System.out.println("i="+i+",j="+j);
-//				StringBuilder sb = new StringBuilder();
-//				for (int z = i; z < j + 1; z++)
-//					sb.append(text[z] == ' ' ? '_' : text[z]);
-//				System.out.println("Adding suffix " + sb.toString());
+			int remainingSuffixes = 1;
 
-				char temp = activePoint.edgeFirstChar != '\0' ? activePoint.edgeFirstChar : text[i + activePoint.length];
-//				System.out.println("Getting edge with first char = " + temp);
-				SuffixEdge edge = activePoint.node.getEdge(temp);
+			// continue looping as long as we have remaining suffixes to insert
+			while (remainingSuffixes >= 1) {
+				char edgeFirstChar = activeEdgeFirstChar != '\0' ? activeEdgeFirstChar : text[currentSuffixStart + activeLength];
+				SuffixEdge foundEdge = activeNode.getEdge(edgeFirstChar);
 
-//				System.out.println("Found edge = " + edge);
+				if (foundEdge != null) {
+					// If we can travel along the found edge using the current suffix to insert, we
+					// 1) increment the activeLength (current position on edge)
+					// 2) increment remainingSuffixes, since we've only implicitly added the suffix
+					// 3) increment currentSuffixEnd, since we need to keep track of the end of the current suffix
 
-				if (edge != null) {
-//					System.out.println("text[" + (edge.textIndex + activePoint.length) + "] (" + text[edge.textIndex + activePoint.length] + ") == [" + (i + activePoint.length) + "] (" + text[i + activePoint.length] + ")?");
-					if (text[edge.textIndex + activePoint.length] == text[i + activePoint.length]) {
-						activePoint.edgeFirstChar = temp;
-						activePoint.length++;
-						remainder++;
-						j++;
-//						length += 1;
-//						System.out.println("length++ (" + activePoint.length + ")");
-						if (activePoint.length == edge.length) { // + 1
-//							System.out.println("activePoint length is equal to current edge length, moving activePoint node");
-							activePoint.node = edge.endNode;
-							activePoint.edgeFirstChar = '\0';
-							activePoint.length = 0;
-							i = j;
-							//remainder--;
+					// TODO: Seems like we have to check if we're at end of edge here as well?? Possible to refactor?
+					if (activeLength == foundEdge.length) {
+						activeNode = foundEdge.endNode;
+						activeLength = 0;
+						activeEdgeFirstChar = '\0';
+						currentSuffixStart = currentSuffixEnd;
+					} else if (text[foundEdge.textIndex + activeLength] == text[currentSuffixStart + activeLength]) {
+						activeEdgeFirstChar = edgeFirstChar;
+						activeLength++;
+						remainingSuffixes++;
+						currentSuffixEnd++;
+
+						// If activeLength is equal to foundEdge.length then we've hit the end of the current edge.
+						// We need to
+						// 1) Set the new activeNode to the edge's endNode so that we can continue looking for insertion points
+						// 2) Reset activeLength to 0 since we're on a new edge
+						// 3) Reset activeEdgeFirstChar since we're on a new edge (and a new suffix)
+						// 4) Set the start position of our new current suffix to the end position of the old one
+						// The implicit suffix that we've 'forgotten' by resetting these things is still accounted for <-- IS THIS RIGHT??
+						if (activeLength == foundEdge.length) {
+							activeNode = foundEdge.endNode;
+							activeLength = 0;
+							activeEdgeFirstChar = '\0';
+							currentSuffixStart = currentSuffixEnd;
 						}
 					} else {
-//						System.out.println("Splitting!");
-//						System.out.println("Remainder = " + remainder);
+						// If we've dropped off the edge somewhere in the middle of it we need to split the edge by doing
+						// 1) Creating a new node to insert, save the old node (it will be the end node of the edge with the remaining suffix from the split)
+						// 2) Calculate the length of new edge going from inserted node with remaining suffix
+						// 3) Set the foundEdge's endNode to new inserted node
+						// 4) Set the foundEdge's new length to the current active point on the edge (activeLength)
+						// 5) Create edge for remaining suffix and new suffix end, and add edges to insertedNode
 
 						SuffixNode insertedNode = new SuffixNode();
-						SuffixNode oldNode = edge.endNode;
-						int oldLength = edge.length;
 
-						edge.endNode = insertedNode;
-						edge.length = activePoint.length;
+						SuffixNode oldNode = foundEdge.endNode;
+						int newLength = oldNode.hashMap.size() > 0 ? Math.abs(foundEdge.length - activeLength) : -1;
 
-//						System.out.println("New (old) edge = " + edge);
-						
+						foundEdge.endNode = insertedNode;
+						foundEdge.length = activeLength;
 
-						int l = oldNode.hashMap.size() > 0 ? Math.abs(oldLength - edge.length) : -1;
-						SuffixEdge newEdge = new SuffixEdge(oldNode, edge.textIndex + edge.length, l);
-						SuffixEdge newEdge2 = new SuffixEdge(new SuffixNode(), j, -1);
+						SuffixEdge edgeRemaining = new SuffixEdge(oldNode, foundEdge.textIndex + foundEdge.length, newLength);
+						SuffixEdge edgeNewSuffix = new SuffixEdge(new SuffixNode(), currentSuffixEnd, -1);
+						insertedNode.addEdge(text[foundEdge.textIndex + foundEdge.length], edgeRemaining);
+						insertedNode.addEdge(text[currentSuffixStart + activeLength], edgeNewSuffix);
 
-//						System.out.println("New edge 1 = " + newEdge);
-//						System.out.println("New edge 2 = " + newEdge2);
+						// Is this necessary?
+						//for (Map.Entry<Character, SuffixEdge> child : foundEdge.endNode.hashMap.entrySet()) {
+						//	child.getValue().textIndex -= 1;
+						//}
 
-						for (Map.Entry<Character, SuffixEdge> child : edge.endNode.hashMap.entrySet()) {
-							child.getValue().textIndex -= 1;
-						}
+						// After all that stuff is done, we decrement remainingSuffixes since we just inserted one (by splitting an edge)
+						remainingSuffixes--;
 
-						insertedNode.addEdge(text[edge.textIndex + edge.length], newEdge);
-						insertedNode.addEdge(text[i + activePoint.length], newEdge2);
+						// If the current active node is the root, we can
+						// 1) Increment currentSuffixStart to try and insert the next remaining suffix
+						// 2) Decrement activeLength to keep in sync with current suffix
+						if (activeNode.equals(root)) {
+							currentSuffixStart++;
+							activeLength--;
 
-						remainder--;
+							// If activeLength has reached 0 (we're no longer trying to insert an implicit suffix) we set the activeEdgeFirstChar to the currentSuffixStart character
+							// otherwise we set it to the next position on the found edge
+							if (activeLength == 0)
+								activeEdgeFirstChar = text[currentSuffixStart];
+							else
+								activeEdgeFirstChar = text[foundEdge.textIndex + 1]; // TODO : IS THIS RIGHT? shouldn't it be textIndex + activeLength? or smt..
 
-						if (activePoint.node.equals(root)) {
-							i++;
-							activePoint.length--;
-							if (activePoint.length == 0) {
-								activePoint.edgeFirstChar = text[i];
-							} else
-								activePoint.edgeFirstChar = text[edge.textIndex + 1]; // + 1
-//							System.out.println("length-- (" + activePoint.length + ")");
 						} else {
-//							System.out.println("Following suffix link to node = " + activePoint.node.suffixLink);
-							activePoint.node = activePoint.node.suffixLink != null ? activePoint.node.suffixLink : root;
-							activePoint.edgeFirstChar = text[i];
-
+							// If the current active node is not the root, then we follow the suffix link of the active node
+							activeNode = activeNode.suffixLink;
+							// TODO: Why exactly are we doing this?
+							//activeEdgeFirstChar = text[currentSuffixEnd];
 						}
 
-						edge.endNode.suffixLink = root;
+						// If we've previously inserted a node this iteration we set that node's suffix link to the currently inserted node
+						foundEdge.endNode.suffixLink = root;
 						if (previouslyInsertedNode != null)
-							previouslyInsertedNode.suffixLink = edge.endNode;
-						previouslyInsertedNode = edge.endNode;
+							previouslyInsertedNode.suffixLink = foundEdge.endNode;
+						previouslyInsertedNode = foundEdge.endNode;
 
-//						this.saveAsImage(i);
 					}
-
 				} else {
-					SuffixEdge newEdge = new SuffixEdge(new SuffixNode(), i, -1);
-					activePoint.node.addEdge(text[i], newEdge);
-					remainder--;
-					
-					if (!activePoint.node.equals(root))
-						activePoint.node = activePoint.node.suffixLink != null ? activePoint.node.suffixLink : root;
+					// If we get there then we didn't find an outgoing edge from the activeNode that started with the char found in currentSuffixStart
+					// 1) Add that char as a new suffix (with an implicit endless length)
+					// 2) Decrement remainingSuffixes since we just added one
+					SuffixEdge newEdge = new SuffixEdge(new SuffixNode(), currentSuffixStart, -1);
+					activeNode.addEdge(text[currentSuffixStart], newEdge);
+					remainingSuffixes--;
+
+					// Do we have to follow the suffix link here too??
+					if (!activeNode.equals(root))
+						activeNode = activeNode.suffixLink;
 					else {
-						i++;
-						j=i;
-						if (i < text.length) {
-							activePoint.edgeFirstChar = text[i];
-	//						length += 1;
-						}
+						// If we're on the root, simply increment suffix start and end to point at the next character
+						currentSuffixStart++;
+						currentSuffixEnd = currentSuffixStart;
+						activeEdgeFirstChar = '\0';
+
+						// TODO: is this necessary??
+						//if (currentSuffixStart < text.length)
+						//	activeEdgeFirstChar = text[currentSuffixStart];
+
 					}
-					
-//					this.saveAsImage(i);
 				}
-
 			}
-			length = i;
-
-//			this.saveAsImage(i);
 		}
-	}
-	
-	private void add(char c, int remainder, ActivePoint activePoint, SuffixNode prevSplitNode) {
 
-		System.out.println(activePoint);
-		System.out.println("Adding " + c);
-
-		char temp;
-		if (activePoint.edgeFirstChar != '\0') {
-			temp = activePoint.edgeFirstChar;
-		} else {
-			temp = c;
-		}
-		
-		//SuffixEdge edge = hashMap.get(new SuffixKey(activePoint.node, temp));
-		SuffixEdge edge = activePoint.node.hashMap.get(temp);
-		
-		System.out.println("found edge = " + edge);
-		
-		if (edge != null) {
-			
-			if (text[edge.textIndex + activePoint.length] == c) {
-//				System.out.println("Found char on current edge");
-				
-				if (temp == c) {					
-					activePoint.edgeFirstChar = c;
-				}
-				activePoint.length++;
-				System.out.println("length++ (" + activePoint.length + ")");
-				remainder++;
-				
-				if (activePoint.length == edge.length) { // + 1
-					activePoint.node = edge.endNode;
-					activePoint.edgeFirstChar = '\0';
-					activePoint.length = 0;
-				}
-				
-			} else {
-				//System.out.println("Splitting edge " + edge);
-				edge.length = length - activePoint.length - edge.textIndex; /*edge.textIndex + activePoint.length - 1; */
-				
-				System.out.println("New current edge = " + edge);
-				
-				SuffixEdge newEdge = new SuffixEdge(new SuffixNode(), edge.textIndex + edge.length, -1);
-				SuffixEdge newEdge2 = new SuffixEdge(new SuffixNode(), length, -1);
-				
-				System.out.println("New edge 1 = " + newEdge);
-				System.out.println("New edge 2 = " + newEdge2);
-				
-				for (Map.Entry<Character, SuffixEdge> child : edge.endNode.hashMap.entrySet()) {
-					child.getValue().textIndex -= 1;
-				}
-				
-				//hashMap.put(new SuffixKey(edge.endNode, text[edge.textIndex + activePoint.length]), newEdge);
-				edge.endNode.hashMap.put(text[edge.textIndex + activePoint.length], newEdge);
-				//hashMap.put(new SuffixKey(edge.endNode, c), newEdge2);
-				edge.endNode.hashMap.put(c, newEdge2);
-				
-				remainder--;
-				
-				if (activePoint.node.equals(root)) {
-					activePoint.length--;
-					if (activePoint.length == 0)
-						activePoint.edgeFirstChar = c;
-					else
-						activePoint.edgeFirstChar = text[edge.textIndex + 1]; // + 1
-					System.out.println("length-- (" + activePoint.length + ")");
-				} else {
-					activePoint.node = activePoint.node.suffixLink != null ? activePoint.node.suffixLink : root;
-				}
-
-				if (prevSplitNode != null)
-					prevSplitNode.suffixLink = edge.endNode;
-								
-				add(c, remainder, activePoint, edge.endNode);
-				
-			}
-			
-		} else {
-			System.out.println("got here");
-			
-			if (!activePoint.node.equals(root))
-				activePoint.node.hashMap.put(c, new SuffixEdge(new SuffixNode(), length, -1));
-				//hashMap.put(new SuffixKey(activePoint.node, c), new SuffixEdge(new SuffixNode(), length, -1));
-			
-			//hashMap.put(new SuffixKey(root, c), new SuffixEdge(new SuffixNode(), length, -1));
-			root.hashMap.put(c, new SuffixEdge(new SuffixNode(), length, -1));
-			
-			
-			//activePoint.edgeFirstChar = '\0';
-			//activePoint.node = root;
-		}
-		
+		length = text.length;
 	}
 	
 	private void findLeaves(List<Integer> matches, SuffixNode node, int currentLength) {
@@ -281,13 +209,16 @@ public class SuffixTree {
 			} else {
 				findLeaves(matches, entry.getValue().endNode, currentLength + entry.getValue().length);
 			}
-		}		
+		}
 	}
 	
 	public List<Integer> find(String pattern) {
 		return find(pattern.toCharArray());
 	}
-	
+
+	// TODO: We have to handle case where pattern is shorter than an edge, there might still be multiple leaf nodes
+	// Example T="the good and the bad", P="the"
+	// If there is an edge "the " (note space!) with child edges "good and the bad" and "bad", we need both!
 	public List<Integer> find(char[] pattern) {
 		List<Integer> matches = new LinkedList<>();
 		
@@ -352,46 +283,49 @@ public class SuffixTree {
 			addEdges(g, child.getValue().endNode);
 		}
 	}
+
+	public void showInWindow() {
+		DefaultDirectedGraph<SuffixNode, SuffixEdge> g = new DefaultDirectedGraph<SuffixNode, SuffixEdge>(SuffixEdge.class);
+		g.addVertex(root);
+		addEdges(g, root);
+
+		JGraphXAdapter<SuffixNode, SuffixEdge> jgxa = new JGraphXAdapter<SuffixNode, SuffixEdge>(g);
+
+		mxIGraphLayout asd = new mxHierarchicalLayout(jgxa);
+		//mxIGraphLayout asd = new mxCircleLayout(jgxa);
+
+		asd.execute(jgxa.getDefaultParent());
+
+		GraphWindow.show(jgxa);
+	}
 	
 	public void saveAsSVG() {
-	DefaultDirectedGraph<SuffixNode, SuffixEdge> g = new DefaultDirectedGraph<SuffixNode, SuffixEdge>(SuffixEdge.class);
-	
-	/*
-	for (Map.Entry<SuffixKey, SuffixEdge> entry : hashMap.entrySet()) {
-		SuffixNode start = entry.getKey().node;
-		SuffixNode end = entry.getValue().endNode;
-	
-		if (!g.containsVertex(start))
-			g.addVertex(start);
-		if (!g.containsVertex(end))
-			g.addVertex(end);
-		g.addEdge(start, end, entry.getValue());
-	}*/
-	
-	g.addVertex(root);
-	addEdges(g, root);
-	
-	JGraphXAdapter<SuffixNode, SuffixEdge> jgxa = new JGraphXAdapter<SuffixNode, SuffixEdge>(g);
-	
-	mxIGraphLayout asd = new mxHierarchicalLayout(jgxa);
+		DefaultDirectedGraph<SuffixNode, SuffixEdge> g = new DefaultDirectedGraph<SuffixNode, SuffixEdge>(SuffixEdge.class);
 
-	asd.execute(jgxa.getDefaultParent());
+		g.addVertex(root);
+		addEdges(g, root);
 
-	String filename = "graph.svg";
-	mxSvgCanvas canvas = (mxSvgCanvas) mxCellRenderer.drawCells(
-	    jgxa, null, 1, null, new CanvasFactory() {
-	    public mxICanvas createCanvas(int width, int height) {
-	        mxSvgCanvas canvas = new mxSvgCanvas(mxDomUtils
-	            .createSvgDocument(width, height));
-	            canvas.setEmbedded(true);
-	            return canvas;
-	        } 
-	    });
-	  try {
-	    mxUtils.writeFile(mxXmlUtils.getXml(canvas.getDocument()), filename);
-	  } catch (IOException e) {
-	    e.printStackTrace();
-	  } 
+		JGraphXAdapter<SuffixNode, SuffixEdge> jgxa = new JGraphXAdapter<SuffixNode, SuffixEdge>(g);
+
+		mxIGraphLayout asd = new mxHierarchicalLayout(jgxa);
+
+		asd.execute(jgxa.getDefaultParent());
+
+		String filename = "graph.svg";
+		mxSvgCanvas canvas = (mxSvgCanvas) mxCellRenderer.drawCells(
+			jgxa, null, 1, null, new CanvasFactory() {
+			public mxICanvas createCanvas(int width, int height) {
+				mxSvgCanvas canvas = new mxSvgCanvas(mxDomUtils
+					.createSvgDocument(width, height));
+					canvas.setEmbedded(true);
+					return canvas;
+				}
+			});
+		  try {
+			mxUtils.writeFile(mxXmlUtils.getXml(canvas.getDocument()), filename);
+		  } catch (IOException e) {
+			e.printStackTrace();
+		  }
 	}
 
 	public void saveAsImage(int length) {
@@ -439,7 +373,7 @@ public class SuffixTree {
 		return sb.toString();
 	}
 
-	private class SuffixEdge {
+	private class SuffixEdge implements Serializable {
 		private SuffixNode endNode;
 		private int textIndex;
 		private int length;
@@ -469,7 +403,7 @@ public class SuffixTree {
 				
 	}
 	
-	private class SuffixNode {
+	private class SuffixNode implements Serializable {
 		private int id;
 		private SuffixNode suffixLink = null;
 		private final Map<Character, SuffixEdge> hashMap = new HashMap<>();
@@ -560,8 +494,7 @@ public class SuffixTree {
 				return false;
 			return true;
 		}
-
-
 	}
+
 }
 
