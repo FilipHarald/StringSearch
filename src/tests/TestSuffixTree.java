@@ -9,11 +9,11 @@ public class TestSuffixTree {
 
 	
 	public static void main(String[] args) {
-		
+
 		TestData data = TestData.loadFiles("alphabet");
-		
-		//SuffixTree st = new SuffixTree("abcabxabcd$".toCharArray());
-		SuffixTree st = new SuffixTree(data.getT());
+
+		SuffixTree st = new SuffixTree("abcabxabcd".toCharArray());
+		//SuffixTree st = new SuffixTree(data.getT());
 		
 		// Den tomma noden 1284693 -> SuffixEdge [endNode=17225372, textIndex=1, length=0, text=] är den som ska var b, har fått length 0
 		// Detta borde vara fixat!
