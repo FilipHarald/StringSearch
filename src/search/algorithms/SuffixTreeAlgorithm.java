@@ -21,6 +21,6 @@ public class SuffixTreeSearch implements Algorithm {
 	public void preProcess(char[] t){
 		st = new SuffixTree(t);
 	}
-	
+
 
 }
