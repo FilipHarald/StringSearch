@@ -21,8 +21,10 @@ public class AlgorithmTester {
 		try {
 			System.out.println("Making sure all algorithms are compiled to native code...");
 
+			TestData temp = TestData.loadFiles("alphabet");
+
 			for (Algorithm algorithm : algorithms) {
-				Search.run(algorithm, data.copy(), 20);
+				Search.run(algorithm, temp.copy(), 20);
 			}
 
 			Thread.sleep(2500);
