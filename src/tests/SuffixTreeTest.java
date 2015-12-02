@@ -6,20 +6,20 @@ import org.junit.Test;
 
 import junit.framework.TestCase;
 import search.Search;
-import search.algorithms.NaiveAlgorithm;
+import search.algorithms.SuffixTreeSearch;
 import search.entities.AlgorithmResult;
 import search.entities.TestData;
 
-public class NaiveAlgorithmTest extends TestCase {
-	
+public class SuffixTreeTest extends TestCase{
+
 	private TestData data;
-	private NaiveAlgorithm algorithm;
+	private SuffixTreeSearch algorithm;
 	private AlgorithmResult result;
 	
 	
 	@Override
 	protected void setUp() throws Exception {
-		algorithm = new NaiveAlgorithm();
+		algorithm = new SuffixTreeSearch();
 		super.setUp();
 	}
 
