@@ -37,6 +37,8 @@ public class SuffixTree implements Serializable {
 	private final SuffixNode root;
 	private final Map<SuffixKey, SuffixEdge> hashMap;
 	private int length;
+
+	private SuffixNode needSuffixLink = null;
 	
 	public SuffixTree(char[] text) {
 		this.text = text;
@@ -64,6 +66,14 @@ public class SuffixTree implements Serializable {
 
 	}
 
+	private void addSuffixLink(SuffixNode node) {
+		if (needSuffixLink != null && !needSuffixLink.equals(root)) {
+			if (needSuffixLink.suffixLink == null)
+				needSuffixLink.suffixLink = node;
+		}
+		needSuffixLink = node;
+	}
+
 	private void build() {
 		SuffixNode activeNode = root;
 		char activeEdgeFirstChar = '\0';
@@ -72,38 +82,26 @@ public class SuffixTree implements Serializable {
 		int currentSuffixStart = 0;
 		int currentSuffixEnd = 0;
 
+		int counter = 0;
+
 		while (currentSuffixStart < text.length) {
 			
 			// at beginning of every suffix we reset remaining counter and previously inserted pointer
-			SuffixNode previouslyInsertedNode = null;
+			needSuffixLink = null;
 			int remainingSuffixes = 1;
+			activeLength = 0;
 
 			// continue looping as long as we have remaining suffixes to insert
 			while (remainingSuffixes >= 1) {
 				length = currentSuffixEnd;
-				this.saveAsImage(currentSuffixStart);
+				this.saveAsImage(counter++);
 				
 				char edgeFirstChar = activeEdgeFirstChar != '\0' ? activeEdgeFirstChar : text[currentSuffixStart + activeLength];
 				SuffixEdge foundEdge = activeNode.getEdge(edgeFirstChar);
 
 				if (foundEdge != null) {
-					// If we can travel along the found edge using the current suffix to insert, we
-					// 1) increment the activeLength (current position on edge)
-					// 2) increment remainingSuffixes, since we've only implicitly added the suffix
-					// 3) increment currentSuffixEnd, since we need to keep track of the end of the current suffix
 
-					// TODO: Seems like we have to check if we're at end of edge here as well?? Possible to refactor?
-					if (activeLength == foundEdge.length) {
-						activeNode = foundEdge.endNode;
-						activeLength = 0;
-						activeEdgeFirstChar = '\0';
-						currentSuffixStart = currentSuffixEnd;
-					} else if (text[foundEdge.textIndex + activeLength] == text[currentSuffixStart + activeLength]) {
-						activeEdgeFirstChar = edgeFirstChar;
-						activeLength++;
-						remainingSuffixes++;
-						currentSuffixEnd++;
-
+					if (foundEdge.length > 0 && activeLength >= foundEdge.length) {
 						// If activeLength is equal to foundEdge.length then we've hit the end of the current edge.
 						// We need to
 						// 1) Set the new activeNode to the edge's endNode so that we can continue looking for insertion points
@@ -111,12 +109,27 @@ public class SuffixTree implements Serializable {
 						// 3) Reset activeEdgeFirstChar since we're on a new edge (and a new suffix)
 						// 4) Set the start position of our new current suffix to the end position of the old one
 						// The implicit suffix that we've 'forgotten' by resetting these things is still accounted for <-- IS THIS RIGHT??
-						if (activeLength == foundEdge.length) {
-							activeNode = foundEdge.endNode;
-							activeLength = 0;
-							activeEdgeFirstChar = '\0';
-							currentSuffixStart = currentSuffixEnd;
-						}
+
+						activeNode = foundEdge.endNode;
+						activeLength = 0;
+						//activeEdgeFirstChar = text[currentSuffixStart + activeLength];
+						activeEdgeFirstChar = '\0';
+						//currentSuffixStart = currentSuffixEnd;
+						currentSuffixStart += foundEdge.length;
+
+					} else if (text[foundEdge.textIndex + activeLength] == text[currentSuffixStart + activeLength]) {
+						// If we can travel along the found edge using the current suffix to insert, we
+						// 1) increment the activeLength (current position on edge)
+						// 2) increment remainingSuffixes, since we've only implicitly added the suffix
+						// 3) increment currentSuffixEnd, since we need to keep track of the end of the current suffix
+
+						activeEdgeFirstChar = edgeFirstChar;
+						activeLength++;
+						remainingSuffixes++;
+						currentSuffixEnd++;
+
+						addSuffixLink(activeNode);
+
 					} else {
 						// If we've dropped off the edge somewhere in the middle of it we need to split the edge by doing
 						// 1) Creating a new node to insert, save the old node (it will be the end node of the edge with the remaining suffix from the split)
@@ -138,10 +151,7 @@ public class SuffixTree implements Serializable {
 						insertedNode.addEdge(text[foundEdge.textIndex + foundEdge.length], edgeRemaining);
 						insertedNode.addEdge(text[currentSuffixStart + activeLength], edgeNewSuffix);
 
-						// Is this necessary?
-						//for (Map.Entry<Character, SuffixEdge> child : foundEdge.endNode.hashMap.entrySet()) {
-						//	child.getValue().textIndex -= 1;
-						//}
+						addSuffixLink(insertedNode);
 
 						// After all that stuff is done, we decrement remainingSuffixes since we just inserted one (by splitting an edge)
 						remainingSuffixes--;
@@ -152,26 +162,11 @@ public class SuffixTree implements Serializable {
 						if (activeNode.equals(root)) {
 							currentSuffixStart++;
 							activeLength--;
-
-							// If activeLength has reached 0 (we're no longer trying to insert an implicit suffix) we set the activeEdgeFirstChar to the currentSuffixStart character
-							// otherwise we set it to the next position on the found edge
-							if (activeLength == 0)
-								activeEdgeFirstChar = text[currentSuffixStart];
-							else
-								activeEdgeFirstChar = text[foundEdge.textIndex + 1]; // TODO : IS THIS RIGHT? shouldn't it be textIndex + activeLength? or smt..
-
+							activeEdgeFirstChar = text[currentSuffixStart];
 						} else {
 							// If the current active node is not the root, then we follow the suffix link of the active node
 							activeNode = activeNode.suffixLink;
-							// TODO: Why exactly are we doing this?
-							//activeEdgeFirstChar = text[currentSuffixEnd];
 						}
-
-						// If we've previously inserted a node this iteration we set that node's suffix link to the currently inserted node
-						foundEdge.endNode.suffixLink = root;
-						if (previouslyInsertedNode != null)
-							previouslyInsertedNode.suffixLink = foundEdge.endNode;
-						previouslyInsertedNode = foundEdge.endNode;
 
 					}
 				} else {
@@ -182,6 +177,8 @@ public class SuffixTree implements Serializable {
 					activeNode.addEdge(text[currentSuffixStart], newEdge);
 					remainingSuffixes--;
 
+					addSuffixLink(activeNode);
+
 					// Do we have to follow the suffix link here too??
 					if (!activeNode.equals(root))
 						activeNode = activeNode.suffixLink;
@@ -190,10 +187,6 @@ public class SuffixTree implements Serializable {
 						currentSuffixStart++;
 						currentSuffixEnd = currentSuffixStart;
 						activeEdgeFirstChar = '\0';
-
-						// TODO: is this necessary??
-						//if (currentSuffixStart < text.length)
-						//	activeEdgeFirstChar = text[currentSuffixStart];
 
 					}
 				}
@@ -204,10 +197,11 @@ public class SuffixTree implements Serializable {
 	}
 	
 	private void findLeaves(List<Integer> matches, SuffixNode node, int currentLength) {
-		System.out.println(node);
 		if (node.hashMap.size() > 0) {
 			for (Map.Entry<Character, SuffixEdge> entry : node.hashMap.entrySet()) {
+				System.out.println("Edge = " + entry.getValue());
 				if (entry.getValue().endNode.hashMap.size() <= 0) {
+					System.out.println("At leaf node " + entry.getValue().endNode);
 					matches.add(entry.getValue().textIndex - currentLength);
 				} else {
 					findLeaves(matches, entry.getValue().endNode, currentLength + entry.getValue().length);
