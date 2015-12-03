@@ -8,6 +8,12 @@ import search.entities.SearchResult;
 import search.entities.TestData;
 
 public class Search {
+	/**Searches 'times' times for the data.pattern in the data.text using the specified algorithm.
+	 * @param algorithm
+	 * @param data
+	 * @param times
+	 * @return The result of the searches
+	 */
 	public static SearchResult run(Algorithm algorithm, TestData data, int times){
 		algorithm.preProcess(data.getT());
 		

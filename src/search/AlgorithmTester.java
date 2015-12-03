@@ -8,8 +8,20 @@ import search.algorithms.Algorithm;
 import search.entities.SearchResult;
 import search.entities.TestData;
 
+/**
+ * Tests the algorithms.
+ * @author Albert Kaaman
+ *
+ */
 public class AlgorithmTester {
 
+	/**
+	 * Runs the algorithms and prints result for the user to compare. 
+	 * More specific it makes sure all algorithms are compiled to native code before running again and printing results.
+	 * @param algorithms The different algortihms that should be compared
+	 * @param data The data for which the algorithms both should search in and search for.
+	 * @param times Number of times each algorithm should be run before calculating an avarage value.
+	 */
 	public static void run(List<Algorithm> algorithms, TestData data, int times) {
 		
 		List<SearchResult> results = new LinkedList<>();
