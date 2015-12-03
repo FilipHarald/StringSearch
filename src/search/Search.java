@@ -15,6 +15,10 @@ public class Search {
 	 * @return The result of the searches
 	 */
 	public static SearchResult run(Algorithm algorithm, TestData data, int times){
+		if(data.getP().length <= 0 || data.getT().length <= 0){
+			System.out.println("Trying to search with algorithm " + algorithm + " Either pattern file or text file is empty");
+			return null;
+		}
 		algorithm.preProcess(data.getT());
 		
 		AlgorithmResult result = null;
