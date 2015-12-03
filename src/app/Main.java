@@ -12,7 +12,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		 
-		TestData data = TestData.loadFiles("repeat");
+		TestData data = TestData.loadFiles("many-as");
 		
 		List<Algorithm> algorithms = new LinkedList<>();
 		
@@ -20,9 +20,11 @@ public class Main {
 		//algorithms.add(new NaiveAlgorithm());
 		//algorithms.add(new NaiveAlgorithm());
 		
-		algorithms.add(new NaiveAlgorithm());
-		algorithms.add(new ZBoxAlgorithm());
+		
 		algorithms.add(new RabinKarpAlgorithm());
+		algorithms.add(new ZBoxAlgorithm());
+		algorithms.add(new NaiveAlgorithm());
+		
 		
 		//algorithms.add(new ZBoxAlgorithm());
 		//algorithms.add(new NaiveAlgorithm());

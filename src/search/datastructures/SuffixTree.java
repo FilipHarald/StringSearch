@@ -73,14 +73,16 @@ public class SuffixTree implements Serializable {
 		int currentSuffixEnd = 0;
 
 		while (currentSuffixStart < text.length) {
-			length = currentSuffixEnd;
-			this.saveAsImage(currentSuffixEnd);
+			
 			// at beginning of every suffix we reset remaining counter and previously inserted pointer
 			SuffixNode previouslyInsertedNode = null;
 			int remainingSuffixes = 1;
 
 			// continue looping as long as we have remaining suffixes to insert
 			while (remainingSuffixes >= 1) {
+				length = currentSuffixEnd;
+				this.saveAsImage(currentSuffixStart);
+				
 				char edgeFirstChar = activeEdgeFirstChar != '\0' ? activeEdgeFirstChar : text[currentSuffixStart + activeLength];
 				SuffixEdge foundEdge = activeNode.getEdge(edgeFirstChar);
 
@@ -203,13 +205,15 @@ public class SuffixTree implements Serializable {
 	
 	private void findLeaves(List<Integer> matches, SuffixNode node, int currentLength) {
 		System.out.println(node);
-		for (Map.Entry<Character, SuffixEdge> entry : node.hashMap.entrySet()) {
-			if (entry.getValue().endNode.hashMap.size() <= 0) {
-				matches.add(entry.getValue().textIndex - currentLength);
-			} else {
-				findLeaves(matches, entry.getValue().endNode, currentLength + entry.getValue().length);
+		if (node.hashMap.size() > 0) {
+			for (Map.Entry<Character, SuffixEdge> entry : node.hashMap.entrySet()) {
+				if (entry.getValue().endNode.hashMap.size() <= 0) {
+					matches.add(entry.getValue().textIndex - currentLength);
+				} else {
+					findLeaves(matches, entry.getValue().endNode, currentLength + entry.getValue().length);
+				}
 			}
-		}
+		} 
 	}
 	
 	public List<Integer> find(String pattern) {
@@ -224,50 +228,40 @@ public class SuffixTree implements Serializable {
 		
 		SuffixNode node = root;
 		int currentIndex = 0;
-		int currentLength = 0;
+		boolean matchFound = false;
 		
 		while (node != null) {
-//			System.out.println(node);
-			if (currentLength == pattern.length) {
-//				System.out.println("here");
-				// If we've gotten to a node and currentLength is equal to pattern length, then all leaf nodes starting from this node are matching suffixes to pattern
-				/*
-				int suffixLength = currentLength;
-				for (Map.Entry<Character, SuffixEdge> entry : node.hashMap.entrySet()) {
-					SuffixNode endNode = entry.getValue().endNode;
-					
-					if (endNode.hashMap.size() > 0) {
-						suffixLength += entry.getValue().length;
-					} else {
-						suffixLength -= 
-						matches.add(entry.getValue().textIndex - suffixLength);
-					}	
-				}
-				*/
-				findLeaves(matches, node, currentLength);
-				
-				return matches;
-				
-			} else {
-				//SuffixEdge edge = hashMap.get(new SuffixKey(node, pattern.charAt(currentIndex)));			
-				SuffixEdge edge = node.hashMap.get(pattern[currentIndex]);
-//				System.out.println(edge);
-				SuffixNode nextNode = null;
-				if (edge != null) {
-					nextNode = edge.endNode;
-					int end = edge.length < 0 ? text.length - edge.textIndex : edge.length;
-					for (int i = 0; i < end; i++) {
-						if (currentIndex + i >= pattern.length) {
-							matches.add(edge.textIndex - (i - currentIndex) - 1);
-							return matches;  // single match since we finished on an edge
-						} else if (text[edge.textIndex + i] != pattern[currentIndex + i]) {
-							return matches; // matches is empty at this point
-						}
+			
+			SuffixEdge edge = node.hashMap.get(pattern[currentIndex]);
+			System.out.println("Found edge with char " + pattern[currentIndex] + " = " + edge);
+			node = null;
+			if (edge != null) {
+				node = edge.endNode;
+				int edgeLength = edge.length < 0 ? text.length - edge.textIndex : edge.length;
+				for (int i = 0; i < edgeLength; i++) {
+					if (currentIndex + i >= pattern.length - 1) {
+						matchFound = true;
+						break;
+					} else if (text[edge.textIndex + i] != pattern[currentIndex + i]) {
+						return matches; // matches is empty at this point
 					}
-					currentLength += edge.length;
-					currentIndex = currentIndex + edge.length;
+				}			
+				
+				//node = nextNode;
+
+				if (matchFound) {
+					if (node.hashMap.size() == 0) {
+						matches.add(edge.textIndex - currentIndex);
+					} else {
+						
+						findLeaves(matches, node, currentIndex + edgeLength);
+					}
+					
+					return matches;
+					
+				} else {
+					currentIndex += edgeLength;
 				}
-				node = nextNode;
 			}
 			
 		}

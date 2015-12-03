@@ -48,6 +48,8 @@ public class AlgorithmTester {
 		}
 
 		System.out.println("AlgorithmTester");
+		System.out.println("T.length = " + data.getT().length);
+		System.out.println("P.length = " + data.getP().length);
 		System.out.println();
 
 		for (Algorithm algorithm : algorithms) {
