@@ -1,5 +1,6 @@
 package search;
 
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import search.algorithms.Algorithm;
@@ -29,6 +30,8 @@ public class Search {
 			result = algorithm.run(data.getP());
 			duration += System.nanoTime() - start;
 		}
+
+		Collections.sort(result.getMatches());
 		
 		return new SearchResult(algorithm, result.getMatches(), result.getOperations(), duration/times, times);
 	}
