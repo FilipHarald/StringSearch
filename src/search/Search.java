@@ -1,7 +1,6 @@
 package search;
 
 import java.util.Collections;
-import java.util.concurrent.TimeUnit;
 
 import search.algorithms.Algorithm;
 import search.entities.AlgorithmResult;

@@ -14,6 +14,7 @@ public interface Algorithm {
 	 * @return 
 	 */
 	AlgorithmResult run(char[] p);
+	AlgorithmResult run(char[][] patterns);
 	
 	void preProcess(char[] t);
 }

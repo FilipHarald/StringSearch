@@ -62,6 +62,23 @@ public class ZBoxAlgorithm implements Algorithm {
 		return new AlgorithmResult(matches, operations);
 	}
 	
+	
+	
+	@Override
+	public AlgorithmResult run(char[][] patterns) {
+		LinkedList<Integer> matches = new LinkedList<Integer>();
+		long operations = 0;
+		for (char[] p : patterns) {
+			AlgorithmResult result = run(p);
+			matches.addAll(result.getMatches());
+			operations += result.getOperations();
+		}
+		
+		return new AlgorithmResult(matches, operations);
+	}
+
+
+
 	private static char[] concat(char[] a, char[] b) {
 	   int aLen = a.length;
 	   int bLen = b.length;

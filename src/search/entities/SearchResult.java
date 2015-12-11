@@ -55,7 +55,7 @@ public class SearchResult extends AlgorithmResult {
 	@Override
 	public String toString() {
 		return "SearchResult [algorithm=" + algorithm + ", repeats=" + repeats + ", duration=" + TimeUnit.NANOSECONDS.toMicros(duration) + " μs"
-				+ ", operations=" + getOperations()  + ", matches=" + getMatches() + "]";
+				+ ", operations=" + getOperations()  + ", \nmatches=" + getMatches() + "]";
 	}
 	
 	

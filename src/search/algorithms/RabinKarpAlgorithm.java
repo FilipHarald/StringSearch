@@ -15,26 +15,35 @@ public class RabinKarpAlgorithm implements Algorithm {
 	
 	@Override
 	public AlgorithmResult run(char[] p) {
+		return run(new char[][]{p});
+	}
+	
+	@Override
+	public AlgorithmResult run(char[][] patterns) {
 		List<Integer> matches = new LinkedList<>();
 		long operations = 0;
+		long[] pHashes = new long[patterns.length];
 		
 		preSquared = 1;
-		for (int i = 1; i <= p.length - 1; i++)
+		for (int i = 1; i <= patterns[0].length - 1; i++)
 			preSquared = (BIG_PRIME * preSquared) % BIG_MOD;
+		
+		for (int i = 0; i < patterns.length; i++)
+			pHashes[i] = firstHash(patterns[i], patterns[i].length);
 
-		long pHash = firstHash(p, p.length), tHash = firstHash(t, p.length);
-		//System.out.println("pHash="+pHash);
+		long tHash = firstHash(t, patterns[0].length);
 
-		for (int i = 0; i < t.length - p.length + 1; i++) {
+		for (int i = 0; i < t.length - patterns[0].length + 1; i++) {
 			if (i > 0)
-				tHash = rollingHash(tHash, t, i - 1, i - 1 + p.length);
+				tHash = rollingHash(tHash, t, i - 1, i - 1 + patterns[0].length);
 			
-			//System.out.println("tHash="+tHash);
-
 			operations++;
-			if (tHash == pHash)
-				if (equal(p, i, i + p.length - 1))
-					matches.add(i);
+			for (int j = 0; j < pHashes.length; j++) {
+				if (tHash == pHashes[j])
+					if (equal(patterns[j], i, i + patterns.length - 1))
+						matches.add(i);
+			}
+				
 		}
 		
 		return new AlgorithmResult(matches, operations);

@@ -1,7 +1,6 @@
 package search.algorithms;
 
 import java.util.LinkedList;
-import java.util.List;
 
 import search.datastructures.SuffixTree;
 import search.entities.AlgorithmResult;
@@ -13,9 +12,22 @@ public class SuffixTreeSearch implements Algorithm {
 	@Override
 	public AlgorithmResult run(char[] p) {
 		Counter operations = new Counter();
-		//TODO: tar inte hänsyn till operations än!!!!
+
 		return new AlgorithmResult(st.find(p, operations), operations.get());
 	}
+	
+	@Override
+	public AlgorithmResult run(char[][] patterns) {
+		LinkedList<Integer> matches = new LinkedList<Integer>();
+		Counter operations = new Counter();
+		for (char[] p : patterns) {
+			matches.addAll(st.find(p, operations));
+		}
+		
+		return new AlgorithmResult(matches, operations.get());
+	}
+
+
 
 	@Override
 	public void preProcess(char[] t){

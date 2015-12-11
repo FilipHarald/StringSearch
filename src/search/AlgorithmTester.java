@@ -1,6 +1,5 @@
 package search;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,7 +35,7 @@ public class AlgorithmTester {
 			TestData temp = TestData.loadFiles("alphabet");
 
 			for (Algorithm algorithm : algorithms) {
-				Search.run(algorithm, temp.copy(), 20);
+				Search.run(algorithm, temp, 20);
 			}
 
 			Thread.sleep(2500);
@@ -54,7 +53,7 @@ public class AlgorithmTester {
 
 		for (Algorithm algorithm : algorithms) {
 			System.out.println("Running algorithm " + algorithm.getClass().getSimpleName() + " over data " + times + " times");
-			results.add(Search.run(algorithm, data.copy(), times));
+			results.add(Search.run(algorithm, data, times));
 		}
 		
 		for (SearchResult result : results) {

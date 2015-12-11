@@ -3,6 +3,8 @@ package search.entities;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Class representing test data used when evaluating search algorithms
@@ -10,7 +12,7 @@ import java.nio.file.Paths;
  *
  */
 public class TestData {
-	private final char[] p;
+	private final char[][] p;
 	private final char[] t;
 	
 	/**
@@ -18,7 +20,7 @@ public class TestData {
 	 * @param t Text to search in
 	 * @param p Pattern to search for
 	 */
-	public TestData(char[] t, char[] p) {
+	public TestData(char[] t, char[][] p) {
 		this.p = p;
 		this.t = t;
 	}
@@ -26,7 +28,7 @@ public class TestData {
 	/**
 	 * @return Pattern to search for
 	 */
-	public char[] getP() {
+	public char[][] getP() {
 		return p;
 	}
 
@@ -43,14 +45,14 @@ public class TestData {
 	public TestData copy() {
 		return new TestData(t.clone(), p.clone());
 	}
-	
+		
 	/**
 	 * Loads text and pattern from files filename.text and filename.pattern. Assumes both files reside in /resources.
 	 * @param filename Filename without any extension
 	 * @return New TestData instance
 	 */
 	public static TestData loadFiles(String filename){
-		return new TestData(load(filename + ".text"), load(filename + ".pattern"));
+		return new TestData(loadText(filename), loadPatterns(filename));
 	}
 	
 	/**
@@ -60,7 +62,7 @@ public class TestData {
 	 * @return New TestData instance
 	 */
 	public static TestData loadFiles(String tFilename, String pFilename){
-		return new TestData(load(tFilename + ".text"), load(pFilename + ".pattern"));
+		return new TestData(loadText(tFilename), loadPatterns(pFilename));
 	}
 	
 	/**
@@ -68,14 +70,47 @@ public class TestData {
 	 * @param filename Filename of file to read 
 	 * @return An array of chars
 	 */
-	private static char[] load(String filename){
+	private static char[] loadText(String filename){
 		final StringBuilder sb = new StringBuilder();
 		try {
-			Files.lines(Paths.get("resources", filename)).forEachOrdered(s -> sb.append(s));
+			Files.lines(Paths.get("resources", filename + ".text")).forEachOrdered(s -> sb.append(s));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		if (sb.charAt(sb.length() - 1) != '$')
+			sb.append("$");
+		
 		return sb.toString().toCharArray();
+	}
+	
+	private static char[][] loadPatterns(String filename){
+		List<StringBuilder> patterns = new LinkedList<>();
+		boolean fileExists = true;
+		int counter = 1;
+		while (fileExists) {
+			final StringBuilder sb = new StringBuilder();
+			try {
+				Files.lines(Paths.get("resources", filename + counter + ".pattern")).forEachOrdered(s -> sb.append(s));
+				counter++;
+				patterns.add(sb);
+				
+			} catch (IOException e) {
+				if (counter == 1) {
+					e.printStackTrace();
+				}
+				
+				fileExists = false;
+			}
+		}
+		
+		char[][] ps = new char[patterns.size()][patterns.get(0).length()];
+		
+		for (int i = 0; i < patterns.size(); i++) {
+			ps[i] = patterns.get(i).toString().toCharArray();
+		}
+		
+		return ps;
 	}
 	
 }

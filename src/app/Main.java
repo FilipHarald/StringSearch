@@ -12,7 +12,8 @@ public class Main {
 
 	public static void main(String[] args) {
 		 
-		TestData data = TestData.loadFiles("lorem");
+		TestData data = TestData.loadFiles("bible-en");
+		TestData data2 = TestData.loadFiles("test");
 		
 		List<Algorithm> algorithms = new LinkedList<>();
 		
@@ -32,6 +33,7 @@ public class Main {
 		
 		
 		AlgorithmTester.run(algorithms, data, 20);
+		//AlgorithmTester.run(algorithms, data2, 20);
 		
 	}
 }
