@@ -5,16 +5,16 @@ import java.util.List;
 
 import search.datastructures.SuffixTree;
 import search.entities.AlgorithmResult;
+import search.entities.Counter;
 
 public class SuffixTreeSearch implements Algorithm {
 	private SuffixTree st;
 
 	@Override
 	public AlgorithmResult run(char[] p) {
-		List<Integer> matches = new LinkedList<>();
-		long operations = 0;
+		Counter operations = new Counter();
 		//TODO: tar inte hänsyn till operations än!!!!
-		return new AlgorithmResult(st.find(p), operations);
+		return new AlgorithmResult(st.find(p, operations), operations.get());
 	}
 
 	@Override

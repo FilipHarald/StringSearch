@@ -20,6 +20,8 @@ import com.mxgraph.util.mxDomUtils;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.util.mxXmlUtils;
 
+import search.entities.Counter;
+
 import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.DefaultDirectedGraph;
 
@@ -165,8 +167,12 @@ public class SuffixTree implements Serializable {
 	public List<Integer> find(String pattern) {
 		return find(pattern.toCharArray());
 	}
-
+	
 	public List<Integer> find(char[] pattern) {
+		return find(pattern, new Counter());
+	}
+
+	public List<Integer> find(char[] pattern, Counter operations) {
 		List<Integer> matches = new LinkedList<>();
 		
 		SuffixNode node = root;
@@ -183,6 +189,8 @@ public class SuffixTree implements Serializable {
 				node = edge.endNode;
 				int edgeLength = edge.length < 0 ? text.length - edge.textIndex : edge.length;
 				for (int i = 0; i < edgeLength; i++) {
+					operations.increment();
+//					System.out.println(operations);
 					if (currentIndex + i >= pattern.length - 1) {
 						matchFound = true;
 						break;
