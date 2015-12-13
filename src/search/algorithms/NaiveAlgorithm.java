@@ -5,8 +5,8 @@ import java.util.LinkedList;
 import search.entities.AlgorithmResult;
 
 /**
+ * Implementation of a naive, linear search algorithm.
  * @author Filip Harald
- *
  */
 public class NaiveAlgorithm implements Algorithm {
 	private char[] t;
@@ -41,8 +41,6 @@ public class NaiveAlgorithm implements Algorithm {
 		
 		return new AlgorithmResult(matches, operations);
 	}
-
-
 
 	@Override
 	public void preProcess(char[] t) {

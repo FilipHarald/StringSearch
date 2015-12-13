@@ -6,11 +6,17 @@ import search.datastructures.SuffixTree;
 import search.entities.AlgorithmResult;
 import search.entities.Counter;
 
+/**
+ * Implementation of a Suffix Tree search. Uses the {@link search.datastructures.SuffixTree} class.
+ * @author Albert Kaaman
+ */
 public class SuffixTreeSearch implements Algorithm {
 	private SuffixTree st;
 
 	@Override
 	public AlgorithmResult run(char[] p) {
+		// We're using a simple custom counter class here so that we can effectively pass
+		// operations by reference to the find method.
 		Counter operations = new Counter();
 
 		return new AlgorithmResult(st.find(p, operations), operations.get());
@@ -26,8 +32,6 @@ public class SuffixTreeSearch implements Algorithm {
 		
 		return new AlgorithmResult(matches, operations.get());
 	}
-
-
 
 	@Override
 	public void preProcess(char[] t){

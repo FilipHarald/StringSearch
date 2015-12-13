@@ -5,6 +5,10 @@ import java.util.List;
 
 import search.entities.AlgorithmResult;
 
+/**
+ * Implementation of the z-box algorithm. Code based on Javascript example code by Jesper Larsson.
+ * @author Albert Kaaman
+ */
 public class ZBoxAlgorithm implements Algorithm {
 	private char[] t;
 	
@@ -13,7 +17,7 @@ public class ZBoxAlgorithm implements Algorithm {
 		List<Integer> matches = new LinkedList<>();
 		long operations = 0;
 	
-		// S = P$T
+		// S = P$T, using null character as $
 		char[] s = concat(p, concat(new char[] {'\0'}, t));	
 	
 		int[] z = new int[s.length];
@@ -27,12 +31,11 @@ public class ZBoxAlgorithm implements Algorithm {
 			 */
 			if (k > r) {
 				m = 0;
-				
 				while (k+m < s.length && s[k+m] == s[m]) { m++; operations++; }
 				z[k] = m;
 				if (m > 0) { r = k+m-1; l = k; }
-			/* If we're inside a z box, ???
-			 * 
+			/* If we're inside a z box, check against previous z-box prefix,
+			 * as far as possible.
 			 */
 			} else {
 				kp = k-l;
@@ -47,22 +50,14 @@ public class ZBoxAlgorithm implements Algorithm {
 					l = k;
 				}
 			}
-			
+
+			// Check if we have a match
 			operations++;
 			if (z[k] == p.length) { matches.add(k - p.length - 1); }
 		}
-		
-		/*
-		for (int i = p.length + 1; i < z.length; i++) {
-			operations++;
-			if (z[i] == p.length) { matches.add(i - (p.length+1)); }
-		}
-		*/
-		
+
 		return new AlgorithmResult(matches, operations);
 	}
-	
-	
 	
 	@Override
 	public AlgorithmResult run(char[][] patterns) {
@@ -77,8 +72,12 @@ public class ZBoxAlgorithm implements Algorithm {
 		return new AlgorithmResult(matches, operations);
 	}
 
-
-
+	/**
+	 * Method to concatenate two char arrays
+	 * @param a First array
+	 * @param b Second array
+	 * @return Concatenated array
+	 */
 	private static char[] concat(char[] a, char[] b) {
 	   int aLen = a.length;
 	   int bLen = b.length;

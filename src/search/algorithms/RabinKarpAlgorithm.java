@@ -5,6 +5,10 @@ import java.util.List;
 
 import search.entities.AlgorithmResult;
 
+/**
+ * Implementation of the Rabin-Karp search algorithm.
+ * @author Albert Kaaman & Filip Harald
+ */
 public class RabinKarpAlgorithm implements Algorithm {
 
 	private static final int BIG_PRIME = 257;
@@ -17,17 +21,24 @@ public class RabinKarpAlgorithm implements Algorithm {
 	public AlgorithmResult run(char[] p) {
 		return run(new char[][]{p});
 	}
-	
+
+	/**
+	 * Runs the algorithm for multiple patterns. All patterns need to be the same length.
+	 * @param patterns The patterns to search for.
+	 * @return Result of search
+	 */
 	@Override
 	public AlgorithmResult run(char[][] patterns) {
 		List<Integer> matches = new LinkedList<>();
 		long operations = 0;
 		long[] pHashes = new long[patterns.length];
-		
+
+		// We precompute the square of BIG_PRIME to save time when computing the next rolling hash
 		preSquared = 1;
 		for (int i = 1; i <= patterns[0].length - 1; i++)
 			preSquared = (BIG_PRIME * preSquared) % BIG_MOD;
-		
+
+		// We hash all patterns
 		for (int i = 0; i < patterns.length; i++)
 			pHashes[i] = firstHash(patterns[i], patterns[i].length);
 
@@ -53,7 +64,14 @@ public class RabinKarpAlgorithm implements Algorithm {
 	public void preProcess(char[] t) {
 		this.t = t;
 	}
-	
+
+	/**
+	 * Checks if the array {@code p} equals the subarray of {@code t} starting from {@code left} and ending in {@code right}
+	 * @param p Array to check
+	 * @param left Starting index of subarray in {@code t}
+	 * @param right Ending index of subarray in {@code t}
+	 * @return True if arrays are equal, otherwise false
+	 */
 	private boolean equal(char[] p, int left, int right) {
 		int j = 0;
 		for (int i = left; i <= right; i++) {
@@ -64,7 +82,7 @@ public class RabinKarpAlgorithm implements Algorithm {
 	}
 
 	/**
-	 * Computes initial hash for the substring a[0...length].
+	 * Computes initial hash for the substring {@code a}[0...{@code length}].
 	 * Uses hash method from Algorithms 4th edition
 	 *
 	 * @param a char array
@@ -82,7 +100,7 @@ public class RabinKarpAlgorithm implements Algorithm {
 	}
 
 	/**
-	 * Computes next rolling hash for substring t[oldLeft+1...newRight].
+	 * Computes next rolling hash for subarray {@code t}[{@code oldLeft}+1...{@code newRight}].
 	 * Uses hash method from Algorithms 4th edition
 	 *
 	 * @param hash current hash

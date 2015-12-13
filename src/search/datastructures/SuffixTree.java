@@ -27,7 +27,6 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 
 import javax.imageio.ImageIO;
 
-
 /**
  * Implementation of a Suffix Tree using Ukkonen's algorithm.
  *
@@ -54,15 +53,23 @@ public class SuffixTree implements Serializable {
 		build();
 	}
 
+	/**
+	 * Adds a suffix link from previous node in need of one {@code needSuffixLink}, to the supplied {@code node}. Sets the supplied node
+	 * as the next node in need of a link.
+	 * @param node Node to link to
+	 */
 	private void addLink(SuffixNode node) {
 		if (needSuffixLink != null)
 			needSuffixLink.suffixLink = node;
 		needSuffixLink = node;
 	}
 
+	/**
+	 * Builds the suffix tree
+	 */
 	private void build() {
 		SuffixNode activeNode = root;
-		char activeEdge = text[0];
+		char activeEdgeFirstChar = text[0];
 		int activeLength = 0;
 
 		int currentSuffixStart = 0;
@@ -71,13 +78,14 @@ public class SuffixTree implements Serializable {
 
 		length = text.length;
 
+		// While we still haven't reached the end of the string
 		while (currentSuffixStart < text.length) {
 			remainingSuffixes++;
-
 			needSuffixLink = null;
 
+			// While there are remaining suffixes to insert
 			while (remainingSuffixes >= 1) {
-				SuffixEdge foundEdge = activeNode.getEdge(activeEdge);
+				SuffixEdge foundEdge = activeNode.getEdge(activeEdgeFirstChar);
 
 				if (foundEdge == null) {
 					// No outgoing edge from active node starting with activeEdge char, create new one
@@ -85,21 +93,23 @@ public class SuffixTree implements Serializable {
 					SuffixEdge newEdge = new SuffixEdge(newNode, currentSuffixStart, -1);
 
 					// Add edge to activenode
-					activeNode.addEdge(activeEdge, newEdge);
+					activeNode.addEdge(activeEdgeFirstChar, newEdge);
 
 					addLink(activeNode);
 
 				} else {
 					if (foundEdge.length > 0 && activeLength >= foundEdge.length) {
+						// We've travelled as far along an edge as we can, we need to switch active node
+						// and then start looking from that node.
 						activeLength -= foundEdge.length;
 						currentSuffixStart += foundEdge.length;
 						activeNode = foundEdge.endNode;
-						activeEdge = text[currentSuffixStart];
+						activeEdgeFirstChar = text[currentSuffixStart];
 						//remainingSuffixes--;
 						continue;
 
 					} else if (text[currentSuffixStart + activeLength] == text[foundEdge.textIndex + activeLength]) {
-						// We're still travelling along active edge
+						// We're still travelling along active edge so simply increase the activeLength
 						activeLength++;
 						//remainingSuffixes++;
 
@@ -107,7 +117,7 @@ public class SuffixTree implements Serializable {
 
 						break;
 					} else {
-						// Current suffix differs from active edge, we need to split
+						// Current suffix differs from active edge, we need to split edge, insert new node.
 
 						SuffixNode insertedNode = new SuffixNode();
 						SuffixNode leafNode = new SuffixNode();
@@ -132,7 +142,8 @@ public class SuffixTree implements Serializable {
 
 				//this.saveAsImage(counter++);
 
-				if (activeNode.equals(root)/* && activeLength > 0*/) {
+				if (activeNode.equals(root)) {
+					// If we're at the root, then we can move up currentSuffixStart to insert the next suffix
 					if (activeLength > 0)
 						activeLength--;
 					currentSuffixStart++;
@@ -141,8 +152,9 @@ public class SuffixTree implements Serializable {
 					if (currentSuffixStart >= text.length)
 						break;
 
-					activeEdge = text[currentSuffixStart];
+					activeEdgeFirstChar = text[currentSuffixStart];
 				} else {
+					// Otherwise we need to follow the active node's suffix link
 					activeNode = activeNode.suffixLink != null ? activeNode.suffixLink : root;
 				}
 
@@ -150,12 +162,18 @@ public class SuffixTree implements Serializable {
 		}
 	}
 
+	/**
+	 * Recursively finds all leaf nodes of {@code node}, adding the starting index of the substring leading
+	 * to the node to {@code matches}.
+	 *
+	 * @param matches List of matches
+	 * @param node Node to follow
+	 * @param currentLength Current length of all substrings down to the followed node
+	 */
 	private void findLeaves(List<Integer> matches, SuffixNode node, int currentLength) {
 		if (node.hashMap.size() > 0) {
 			for (Map.Entry<Character, SuffixEdge> entry : node.hashMap.entrySet()) {
-				//System.out.println("Edge = " + entry.getValue());
 				if (entry.getValue().endNode.hashMap.size() <= 0) {
-					//System.out.println("At leaf node " + entry.getValue().endNode);
 					matches.add(entry.getValue().textIndex - currentLength);
 				} else {
 					findLeaves(matches, entry.getValue().endNode, currentLength + entry.getValue().length);
@@ -163,15 +181,31 @@ public class SuffixTree implements Serializable {
 			}
 		} 
 	}
-	
+
+	/**
+	 * Searches for {@code pattern] in the Suffix Tree.
+	 * @param pattern Pattern to search for
+	 * @return A list of matches
+	 */
 	public List<Integer> find(String pattern) {
 		return find(pattern.toCharArray());
 	}
-	
+
+	/**
+	 * Searches for {@code pattern} in the Suffix Tree
+	 * @param pattern Pattern to search for, as a char array
+	 * @return A list of matches
+	 */
 	public List<Integer> find(char[] pattern) {
 		return find(pattern, new Counter());
 	}
 
+	/**
+	 * Searches for {@code pattern} in the Suffix Tree. Counts the number of operations and saves the value to {@code operations}
+	 * @param pattern Pattern to search for, as a char array
+	 * @param operations Counter to save number of operations
+	 * @return A list of matches
+	 */
 	public List<Integer> find(char[] pattern, Counter operations) {
 		List<Integer> matches = new LinkedList<>();
 		
@@ -180,32 +214,32 @@ public class SuffixTree implements Serializable {
 		boolean matchFound = false;
 		
 		while (node != null) {
-			//System.out.println("At node " + node);
 			SuffixEdge edge = node.hashMap.get(pattern[currentIndex]);
-			//System.out.println("Found edge with char " + pattern[currentIndex] + " = " + edge);
 			node = null;
 			if (edge != null) {
-				//System.out.println("Edge ends in node " + edge.endNode);
 				node = edge.endNode;
 				int edgeLength = edge.length < 0 ? text.length - edge.textIndex : edge.length;
 				for (int i = 0; i < edgeLength; i++) {
 					operations.increment();
-//					System.out.println(operations);
+
 					if (currentIndex + i >= pattern.length - 1) {
+						// If we've travelled along the current edge equal to or greater
+						// than the pattern's length, then we have a match
 						matchFound = true;
 						break;
 					} else if (text[edge.textIndex + i] != pattern[currentIndex + i]) {
-						return matches; // matches is empty at this point
+						// If the current character on the edge does not equal the pattern's character, we've fallen off
+						// and return an empty list.
+						return matches;
 					}
 				}			
-				
-				//node = nextNode;
 
 				if (matchFound) {
 					if (node.hashMap.size() == 0) {
+						// If the matched node has no children, then the only match is the edge leading to it
 						matches.add(edge.textIndex - currentIndex);
 					} else {
-						
+						// Otherwise we need to find all leaves under it. The edges leading to the leaves are all matches.
 						findLeaves(matches, node, currentIndex + edgeLength);
 					}
 					
@@ -292,16 +326,14 @@ public class SuffixTree implements Serializable {
 			e.printStackTrace();
 		}
 	}
-	
 
+	/**
+	 * Internal class representing an edge in the SuffixTree
+	 */
 	private class SuffixEdge implements Serializable {
 		private SuffixNode endNode;
 		private int textIndex;
 		private int length;
-
-		public SuffixEdge() {
-			super();
-		}
 
 		public SuffixEdge(SuffixNode endNode, int index, int length) {
 			this.endNode = endNode;
@@ -324,7 +356,11 @@ public class SuffixTree implements Serializable {
 		}
 				
 	}
-	
+
+	/**
+	 * Internal class representing a node in the SuffixTree. Each node holds a record of the outgoing
+	 * edges from that node, in a hash map.
+	 */
 	private class SuffixNode implements Serializable {
 		private int id;
 		private SuffixNode suffixLink = null;
@@ -350,8 +386,7 @@ public class SuffixTree implements Serializable {
 		public void addEdge(char c, SuffixEdge e) {
 			hashMap.put(c, e);
 		}
-		
-		
+
 	}
 
 }
