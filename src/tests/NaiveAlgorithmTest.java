@@ -33,7 +33,7 @@ public class NaiveAlgorithmTest extends TestCase {
 
 	@Test
 	public void testBible() {
-		data = TestData.loadFiles("Bible-en");
+		data = TestData.loadFiles("bible-en", "jesus");
 		algorithm.preProcess(data.getT());
 		result = algorithm.run(data.getP());
 		assertTrue("First occurrance of Jesus", result.getMatches().get(0) == 3067567);

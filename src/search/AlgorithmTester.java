@@ -23,8 +23,6 @@ public class AlgorithmTester {
 	 */
 	public static void run(List<Algorithm> algorithms, TestData data, int times) {
 		
-		List<SearchResult> results = new LinkedList<>();
-
 		/**
 		 * VM arguments = -XX:CompileThreshold=100
 		 * -XX:+PrintCompilation to print out when JVM compiles what method
@@ -32,10 +30,10 @@ public class AlgorithmTester {
 		try {
 			System.out.println("Making sure all algorithms are compiled to native code...");
 
-			TestData temp = TestData.loadFiles("alphabet");
+			TestData temp = TestData.loadFiles("many-as");
 
 			for (Algorithm algorithm : algorithms) {
-				Search.run(algorithm, temp, 20);
+				Search.run(algorithm, temp, 105);
 			}
 
 			Thread.sleep(2500);
@@ -53,12 +51,8 @@ public class AlgorithmTester {
 
 		for (Algorithm algorithm : algorithms) {
 			System.out.println("Running algorithm " + algorithm.getClass().getSimpleName() + " over data " + times + " times");
-			results.add(Search.run(algorithm, data, times));
+			System.out.println(Search.run(algorithm, data, times));
 		}
-		
-		for (SearchResult result : results) {
-			System.out.println(result);
-		}
-		
+
 	}
 }

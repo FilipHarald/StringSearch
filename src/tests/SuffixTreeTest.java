@@ -10,6 +10,8 @@ import search.algorithms.SuffixTreeSearch;
 import search.entities.AlgorithmResult;
 import search.entities.TestData;
 
+import java.util.Collections;
+
 public class SuffixTreeTest extends TestCase{
 
 	private TestData data;
@@ -33,9 +35,10 @@ public class SuffixTreeTest extends TestCase{
 
 	@Test
 	public void testBible() {
-		data = TestData.loadFiles("alphabet");
+		data = TestData.loadFiles("bible-en", "jesus");
 		algorithm.preProcess(data.getT());
 		result = algorithm.run(data.getP());
+		Collections.sort(result.getMatches());
 		assertTrue("First occurrance of Jesus", result.getMatches().get(0) == 3067567);
 		assertTrue("Number of times Jesus is mentioned", result.getMatches().size() == 977);
 	}

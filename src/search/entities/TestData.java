@@ -1,6 +1,8 @@
 package search.entities;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.MalformedInputException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedList;
@@ -81,14 +83,26 @@ public class TestData {
 	 * @param filename Filename of file to read 
 	 * @return An array of chars
 	 */
-	private static char[] loadText(String filename){
+	private static char[] loadText(String filename) {
+		return loadText(filename, Charset.forName("UTF-8"));
+	}
+
+	/**
+	 * Reads a file (using the supplied {@code charset}), and returns an array containing all characters in the file.
+	 * @param filename Filename of file to read
+	 * @param charset Charset to read file in
+	 * @return An array of chars
+	 */
+	private static char[] loadText(String filename, Charset charset){
 		final StringBuilder sb = new StringBuilder();
 		try {
-			Files.lines(Paths.get("resources", filename + ".text")).forEachOrdered(s -> sb.append(s));
+			Files.lines(Paths.get("resources", filename + ".text"), Charset.forName("UTF-8")).forEachOrdered(s -> sb.append(s));
+		} catch (MalformedInputException ex) {
+			return loadText(filename, Charset.forName("Cp1252"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		if (sb.charAt(sb.length() - 1) != '$')
 			sb.append("$");
 		

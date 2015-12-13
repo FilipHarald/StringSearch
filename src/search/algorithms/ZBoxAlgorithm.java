@@ -34,7 +34,7 @@ public class ZBoxAlgorithm implements Algorithm {
 				while (k+m < s.length && s[k+m] == s[m]) { m++; operations++; }
 				z[k] = m;
 				if (m > 0) { r = k+m-1; l = k; }
-			/* If we're inside a z box, check against previous z-box prefix,
+			/* If we're inside a z box, check against prototype z-box,
 			 * as far as possible.
 			 */
 			} else {

@@ -1,11 +1,8 @@
 package tests;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 import junit.framework.TestCase;
-import search.Search;
 import search.algorithms.Algorithm;
 import search.algorithms.RabinKarpAlgorithm;
 import search.entities.AlgorithmResult;
@@ -34,17 +31,10 @@ public class RabinKarpTest extends TestCase{
 
 	@Test
 	public void testBible() {
-		data = TestData.loadFiles("bible-en");
-		algorithm.preProcess(data.getT());
-		result = algorithm.run(data.getP());
-		System.out.println(result.getMatches());
-		assertTrue("Number of times Jesus is mentioned", result.getMatches().size() == 977);
-	}
-	@Test
-	public void testBible2() {		
-		data = TestData.loadFiles("bible-en");
+		data = TestData.loadFiles("bible-en", "jesus");
 		algorithm.preProcess(data.getT());
 		result = algorithm.run(data.getP());
 		assertTrue("First occurrance of Jesus", result.getMatches().get(0) == 3067567);
+		assertTrue("Number of times Jesus is mentioned", result.getMatches().size() == 977);
 	}
 }
