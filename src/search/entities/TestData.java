@@ -49,13 +49,31 @@ public class TestData {
 	}
 	
 	/**
-	 * Loads text and pattern from files with separate filenames. Assumes both files reside in /resources.
+	 * Loads text and patterns from files with separate filenames. Assumes all files reside in /resources.
 	 * @param tFilename Filename of text file without any extension
-	 * @param pFilename Filename of pattern file without any extension
+	 * @param pFilenames List of patterns to load
 	 * @return New TestData instance
 	 */
-	public static TestData loadFiles(String tFilename, String pFilename){
-		return new TestData(loadText(tFilename), loadPatterns(pFilename));
+	public static TestData loadFiles(String tFilename, String... pFilenames) {
+		List<StringBuilder> patterns = new LinkedList<>();
+
+		for (String pFilename : pFilenames) {
+			final StringBuilder sb = new StringBuilder();
+			try {
+				Files.lines(Paths.get("resources", pFilename + ".pattern")).forEachOrdered(s -> sb.append(s));
+				patterns.add(sb);
+
+			} catch (IOException e) {
+			}
+		}
+
+		char[][] ps = new char[pFilenames.length][patterns.get(0).length()];
+
+		for (int i = 0; i < patterns.size(); i++) {
+			ps[i] = patterns.get(i).toString().toCharArray();
+		}
+
+		return new TestData(loadText(tFilename), ps);
 	}
 	
 	/**

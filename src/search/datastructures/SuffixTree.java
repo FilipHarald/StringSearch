@@ -48,7 +48,7 @@ public class SuffixTree implements Serializable {
 	
 	public SuffixTree(char[] text) {
 		this.text = text;
-		root = new SuffixNode();
+		root = new SuffixNode(text.length);
 
 		build();
 	}
@@ -364,10 +364,15 @@ public class SuffixTree implements Serializable {
 	private class SuffixNode implements Serializable {
 		private int id;
 		private SuffixNode suffixLink = null;
-		private final Map<Character, SuffixEdge> hashMap = new HashMap<>();
+		private final Map<Character, SuffixEdge> hashMap;
 
 		public SuffixNode() {
+			this(10);
+		}
+
+		public SuffixNode(int initialSize) {
 			this.id = SuffixTree.nodeId++;
+			hashMap = new HashMap<>(initialSize);
 		}
 
 		@Override
