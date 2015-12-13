@@ -38,14 +38,7 @@ public class TestData {
 	public char[] getT() {
 		return t;
 	}
-	
-	/**
-	 * @return A new copy of this TestData instance
-	 */
-	public TestData copy() {
-		return new TestData(t.clone(), p.clone());
-	}
-		
+
 	/**
 	 * Loads text and pattern from files filename.text and filename.pattern. Assumes both files reside in /resources.
 	 * @param filename Filename without any extension
@@ -83,7 +76,12 @@ public class TestData {
 		
 		return sb.toString().toCharArray();
 	}
-	
+
+	/**
+	 * Reads all pattern files named filename followed by a digit.
+	 * @param filename Filename to read
+	 * @return An array of all patterns found
+	 */
 	private static char[][] loadPatterns(String filename){
 		List<StringBuilder> patterns = new LinkedList<>();
 		boolean fileExists = true;
