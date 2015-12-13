@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.List;
 
+/*
 import com.mxgraph.layout.hierarchical.*;
 import com.mxgraph.canvas.mxICanvas;
 import com.mxgraph.canvas.mxSvgCanvas;
@@ -19,13 +20,18 @@ import com.mxgraph.util.mxCellRenderer.CanvasFactory;
 import com.mxgraph.util.mxDomUtils;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.util.mxXmlUtils;
+import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.view.mxGraph;
+*/
 
 import search.entities.Counter;
 
+/*
 import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.DefaultDirectedGraph;
 
 import javax.imageio.ImageIO;
+*/
 
 /**
  * Implementation of a Suffix Tree using Ukkonen's algorithm.
@@ -253,7 +259,8 @@ public class SuffixTree implements Serializable {
 		}
 		return matches;
 	}
-	
+
+	/*
 	private void addEdges(DefaultDirectedGraph<SuffixNode, SuffixEdge> g, SuffixNode n) {
 		for (Map.Entry<Character, SuffixEdge> child : n.hashMap.entrySet()) {
 			g.addVertex(child.getValue().endNode);
@@ -261,6 +268,7 @@ public class SuffixTree implements Serializable {
 			addEdges(g, child.getValue().endNode);
 		}
 	}
+
 
 	public void showInWindow() {
 		DefaultDirectedGraph<SuffixNode, SuffixEdge> g = new DefaultDirectedGraph<SuffixNode, SuffixEdge>(SuffixEdge.class);
@@ -326,6 +334,7 @@ public class SuffixTree implements Serializable {
 			e.printStackTrace();
 		}
 	}
+	*/
 
 	/**
 	 * Internal class representing an edge in the SuffixTree
@@ -393,6 +402,29 @@ public class SuffixTree implements Serializable {
 		}
 
 	}
+
+	/*
+	public class GraphWindow extends JFrame {
+
+		public GraphWindow(mxGraph graph)
+		{
+			super("Hello, World!");
+
+			Object parent = graph.getDefaultParent();
+
+			mxGraphComponent graphComponent = new mxGraphComponent(graph);
+
+			getContentPane().add(graphComponent);
+		}
+
+		public void show(mxGraph g)
+		{
+			GraphWindow frame = new GraphWindow(g);
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame.setSize(400, 320);
+			frame.setVisible(true);
+		}
+	}*/
 
 }
 
